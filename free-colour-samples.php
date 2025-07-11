@@ -149,10 +149,108 @@ add_action('woocommerce_after_shop_loop_item', function() {
     <?php
 }, 25);
 
-// Add button to single product page next to Add to Cart
+// Helper function to find kleur attribute in variable products
+function tiwsc_get_kleur_attribute($product) {
+    if (!$product || !$product->is_type('variable')) {
+        return false;
+    }
+    
+    $attributes = $product->get_attributes();
+    $color_attr_slug = '';
+    
+    foreach ($attributes as $attr_name => $attr_obj) {
+        $label = $attr_obj->is_taxonomy()
+            ? wc_attribute_label($attr_obj->get_taxonomy())
+            : $attr_obj->get_name();
+        
+        if (strtolower($label) === 'kleur') {
+            $color_attr_slug = $attr_obj->is_taxonomy() ? $attr_obj->get_taxonomy() : sanitize_title($label);
+            return $color_attr_slug;
+        }
+    }
+    
+    return false;
+}
+
+// Add color sample buttons for variable products
+add_action('woocommerce_after_variations_table', function() {
+    if (!tiwsc_is_enabled()) return;
+    global $product;
+    
+    if (!$product || !$product->is_type('variable')) return;
+    if (get_post_meta($product->get_id(), '_tiwsc_free_sample', true) !== 'yes') return;
+    
+    $color_attr_slug = tiwsc_get_kleur_attribute($product);
+    if (!$color_attr_slug) return;
+    
+    $product_id = $product->get_id();
+    $color_terms = wc_get_product_terms($product_id, $color_attr_slug, array('fields' => 'all'));
+    
+    if (empty($color_terms)) return;
+    
+    tiwsc_safe_session_start();
+    $samples = isset($_SESSION['tiwsc_samples']) ? $_SESSION['tiwsc_samples'] : [];
+    
+    ?>
+    <div class="tiwsc-color-sample-buttons" style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+        <h4 style="margin-top: 0; margin-bottom: 15px;"><?php _e('Gratis kleurstalen aanvragen', 'free-colour-samples'); ?></h4>
+        <div class="tiwsc-color-buttons-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+        <?php foreach ($color_terms as $term): 
+            $sample_key = $product_id . '|' . $color_attr_slug . '|' . $term->slug;
+            $is_added = in_array($sample_key, $samples);
+        ?>
+            <button type="button" 
+                    class="tiwsc-variable-sample-button<?php if($is_added) echo ' tiwsc-added'; ?>" 
+                    data-product-id="<?php echo esc_attr($product_id); ?>"
+                    data-attribute-name="<?php echo esc_attr($color_attr_slug); ?>"
+                    data-attribute-value="<?php echo esc_attr($term->slug); ?>"
+                    data-color-name="<?php echo esc_attr($term->name); ?>"
+                    style="padding: 10px 15px; border: 1px solid #ddd; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; transition: all 0.2s;">
+                <span style="margin-right: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                        <?php if($is_added): ?>
+                            <path d="m6,19c0,.552-.448,1-1,1s-1-.448-1-1,.448-1,1-1,1,.448,1,1Z" fill="#88ae98"/>
+                            <path d="M24,14v10H5c-2.757,0-5-2.243-5-5V0h10v6.929l4.899-4.9,7.071,7.071-4.899,4.899h6.929ZM9.95,19.708l10.607-10.607-5.657-5.657-4.899,4.9v10.657c0,.24-.017.476-.05.708ZM1,6h8V1H1v5Zm0,6h8v-5H1v5Zm8,7v-6H1v6c0,2.209,1.791,4,4,4s4-1.791,4-4Zm14-4h-6.929l-7.536,7.536c-.169.169-.347.323-.535.464h14.999v-8Z" fill="#333"/>
+                        <?php else: ?>
+                            <path d="m6,19c0,.552-.448,1-1,1s-1-.448-1-1,.448-1,1-1,1,.448,1,1Z" fill="none" stroke="#333"/>
+                            <path d="M24,14v10H5c-2.757,0-5-2.243-5-5V0h10v6.929l4.899-4.9,7.071,7.071-4.899,4.899h6.929ZM9.95,19.708l10.607-10.607-5.657-5.657-4.899,4.9v10.657c0,.24-.017.476-.05.708ZM1,6h8V1H1v5Zm0,6h8v-5H1v5Zm8,7v-6H1v6c0,2.209,1.791,4,4,4s4-1.791,4-4Zm14-4h-6.929l-7.536,7.536c-.169.169-.347.323-.535.464h14.999v-8Z" fill="#333"/>
+                        <?php endif; ?>
+                    </svg>
+                </span>
+                <span class="tiwsc-button-text">
+                    <?php echo $is_added ? __('Toegevoegd', 'free-colour-samples') : esc_html($term->name); ?>
+                </span>
+            </button>
+        <?php endforeach; ?>
+        </div>
+    </div>
+    <style>
+    .tiwsc-variable-sample-button:hover:not(.tiwsc-added) {
+        background: #88ae98 !important;
+        color: white !important;
+        border-color: #88ae98 !important;
+    }
+    .tiwsc-variable-sample-button:hover:not(.tiwsc-added) svg path {
+        stroke: white !important;
+        fill: white !important;
+    }
+    .tiwsc-variable-sample-button.tiwsc-added {
+        background: #f0f0f0;
+        opacity: 0.7;
+        cursor: default;
+    }
+    </style>
+    <?php
+});
+
+// Add button to single product page next to Add to Cart (for simple products)
 add_action('woocommerce_after_add_to_cart_button', function() {
     if (!tiwsc_is_enabled()) return;
     global $product;
+    
+    // Skip if this is a variable product (handled by woocommerce_after_variations_table)
+    if ($product && $product->is_type('variable')) return;
+    
     $product_id = $product->get_id();
     if (get_post_meta($product_id, '_tiwsc_free_sample', true) !== 'yes') return;
     tiwsc_safe_session_start();
@@ -249,6 +347,9 @@ function tiwsc_toggle_sample_callback() {
     if (!tiwsc_is_enabled()) wp_send_json(['added' => false, 'limit' => false, 'not_allowed' => true]);
     
     $product_id = intval($_POST['product_id']);
+    $attribute_name = isset($_POST['attribute']) ? sanitize_text_field($_POST['attribute']) : '';
+    $attribute_value = isset($_POST['value']) ? sanitize_text_field($_POST['value']) : '';
+    
     if (get_post_meta($product_id, '_tiwsc_free_sample', true) !== 'yes') {
         wp_send_json(['added' => false, 'limit' => false, 'not_allowed' => true]);
     }
@@ -258,16 +359,24 @@ function tiwsc_toggle_sample_callback() {
     
     $samples = $_SESSION['tiwsc_samples'];
     
-    if (in_array($product_id, $samples)) {
+    // For variable products, create a unique key with product|attribute|value
+    // For simple products, just use the product ID
+    if (!empty($attribute_name) && !empty($attribute_value)) {
+        $sample_key = $product_id . '|' . $attribute_name . '|' . $attribute_value;
+    } else {
+        $sample_key = $product_id;
+    }
+    
+    if (in_array($sample_key, $samples)) {
         // Remove sample
-        $_SESSION['tiwsc_samples'] = array_values(array_diff($samples, [$product_id]));
+        $_SESSION['tiwsc_samples'] = array_values(array_diff($samples, [$sample_key]));
         wp_send_json(['added' => false, 'limit' => false]);
     } else {
         // Add sample
         if (count($samples) >= 5) {
             wp_send_json(['added' => false, 'limit' => true, 'message' => __('Je kunt maximaal 5 kleurstalen selecteren.', 'free-colour-samples')]);
         }
-        $_SESSION['tiwsc_samples'][] = $product_id;
+        $_SESSION['tiwsc_samples'][] = $sample_key;
         $_SESSION['tiwsc_samples'] = array_unique($_SESSION['tiwsc_samples']); // Remove duplicates
         $_SESSION['tiwsc_samples'] = array_values($_SESSION['tiwsc_samples']); // Re-index
         wp_send_json(['added' => true, 'limit' => false]);
@@ -280,12 +389,13 @@ function tiwsc_remove_sample_callback() {
     if (!tiwsc_is_enabled()) wp_send_json(['removed' => false]);
     
     $product_id = intval($_POST['product_id']);
+    $sample_key = isset($_POST['sample_key']) ? sanitize_text_field($_POST['sample_key']) : $product_id;
     
     // Ensure session is started
     if (!session_id()) session_start();
     
     if (isset($_SESSION['tiwsc_samples'])) {
-        $_SESSION['tiwsc_samples'] = array_values(array_diff($_SESSION['tiwsc_samples'], [$product_id]));
+        $_SESSION['tiwsc_samples'] = array_values(array_diff($_SESSION['tiwsc_samples'], [$sample_key]));
     }
     wp_send_json(['removed' => true]);
 }
@@ -300,10 +410,26 @@ function tiwsc_get_sidebar_callback() {
     if ($samples) {
         echo '<div class="tiwsc-selected-samples-list">';
         echo '<h2 style="margin-top:0;">' . __('Geselecteerde Kleurstalen', 'free-colour-samples') . '</h2>';
-        foreach ($samples as $product_id) {
-            $product = wc_get_product($product_id);
-            if (!$product) continue;
-            $title = $product->get_title();
+        foreach ($samples as $sample_key) {
+            // Parse the sample key
+            if (strpos($sample_key, '|') !== false) {
+                // Variable product: product_id|attribute|value
+                list($product_id, $attribute, $value) = explode('|', $sample_key);
+                $product = wc_get_product($product_id);
+                if (!$product) continue;
+                
+                // Get the color term name
+                $term = get_term_by('slug', $value, $attribute);
+                $color_name = $term ? $term->name : $value;
+                $title = $product->get_title() . ' - ' . $color_name;
+            } else {
+                // Simple product
+                $product_id = $sample_key;
+                $product = wc_get_product($product_id);
+                if (!$product) continue;
+                $title = $product->get_title();
+            }
+            
             $image = get_the_post_thumbnail($product_id, 'thumbnail', [
                 'style' => 'width:56px;height:56px;object-fit:cover;margin-right:16px;vertical-align:middle;'
             ]);
@@ -311,7 +437,7 @@ function tiwsc_get_sidebar_callback() {
             echo '<div class="sample-prodcuct-img-wrapper">';
             echo $image;
             echo '<span>' . esc_html($title) . '</span>';
-            echo '<a href="#" class="tiwsc-remove-sample" data-product-id="' . esc_attr($product_id) . '" style="text-decoration:none;"><img width="auto" height="auto" src="' . plugins_url('assets/images/delete_icon.png', __FILE__) . '" alt="" /></a>';
+            echo '<a href="#" class="tiwsc-remove-sample" data-product-id="' . esc_attr($product_id) . '" data-sample-key="' . esc_attr($sample_key) . '" style="text-decoration:none;"><img width="auto" height="auto" src="' . plugins_url('assets/images/delete_icon.png', __FILE__) . '" alt="" /></a>';
             echo '</div>';
             echo '</div>';
         }
@@ -439,9 +565,21 @@ function tiwsc_submit_sample_form_callback() {
             __('Land', 'free-colour-samples') . ": $country\n\n" .
             __('Geselecteerde Kleurstalen:', 'free-colour-samples') . "\n";
     
-    foreach ($samples as $product_id) {
-        $product = wc_get_product($product_id);
-        if ($product) $body .= "- " . $product->get_title() . "\n";
+    foreach ($samples as $sample_key) {
+        if (strpos($sample_key, '|') !== false) {
+            // Variable product: product_id|attribute|value
+            list($product_id, $attribute, $value) = explode('|', $sample_key);
+            $product = wc_get_product($product_id);
+            if ($product) {
+                $term = get_term_by('slug', $value, $attribute);
+                $color_name = $term ? $term->name : $value;
+                $body .= "- " . $product->get_title() . " - " . $color_name . "\n";
+            }
+        } else {
+            // Simple product
+            $product = wc_get_product($sample_key);
+            if ($product) $body .= "- " . $product->get_title() . "\n";
+        }
     }
 
     $admin_email = get_option('tiwsc_admin_email', get_option('admin_email'));

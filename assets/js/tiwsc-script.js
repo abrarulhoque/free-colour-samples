@@ -6,7 +6,7 @@ jQuery(document).ready(function($) {
     console.log('Sidebar element exists:', $('#tiwsc-sidebar').length);
     console.log('Overlay element exists:', $('#tiwsc-sidebar-overlay').length);
     
-    // Toggle sample functionality
+    // Toggle sample functionality for simple products
     $(document).on('click', '.tiwsc-free-sample-link', function(e) {
         e.preventDefault();
         console.log('Sample link clicked');
@@ -56,6 +56,58 @@ jQuery(document).ready(function($) {
         });
     });
     
+    // Toggle sample functionality for variable products (color-specific)
+    $(document).on('click', '.tiwsc-variable-sample-button', function(e) {
+        e.preventDefault();
+        console.log('Variable sample button clicked');
+        var $this = $(this);
+        var productId = $this.data('product-id');
+        var attributeName = $this.data('attribute-name');
+        var attributeValue = $this.data('attribute-value');
+        var colorName = $this.data('color-name');
+        console.log('Product ID:', productId, 'Attribute:', attributeName, 'Value:', attributeValue);
+        
+        if (typeof tiwsc_ajax === 'undefined') {
+            console.error('tiwsc_ajax is undefined');
+            return;
+        }
+        
+        $.post(tiwsc_ajax.ajax_url, {
+            action: 'tiwsc_toggle_sample',
+            product_id: productId,
+            attribute: attributeName,
+            value: attributeValue
+        }, function(response) {
+            console.log('Toggle response:', response);
+            if (response.not_allowed) {
+                alert('Deze functie is niet beschikbaar.');
+                return;
+            }
+            
+            if (response.limit) {
+                alert(response.message || 'Je kunt maximaal 5 kleurstalen selecteren.');
+                return;
+            }
+            
+            if (response.added) {
+                $this.addClass('tiwsc-added');
+                $this.find('.tiwsc-button-text').text('Toegevoegd');
+                // Update SVG to filled version
+                $this.find('svg path:first-child').attr('fill', '#88ae98');
+                
+                // Auto-open sidebar when sample is added
+                openSidebar();
+            } else {
+                $this.removeClass('tiwsc-added');
+                $this.find('.tiwsc-button-text').text(colorName);
+                // Update SVG to outline version
+                $this.find('svg path:first-child').attr('fill', 'none').attr('stroke', '#333');
+            }
+        }, 'json').fail(function(xhr, status, error) {
+            console.error('AJAX error:', status, error);
+        });
+    });
+    
     // Open sidebar functionality
     $(document).on('click', '.tiwsc-open-sidebar-link', function(e) {
         e.preventDefault();
@@ -76,6 +128,7 @@ jQuery(document).ready(function($) {
         console.log('Remove sample clicked');
         var $this = $(this);
         var productId = $this.data('product-id');
+        var sampleKey = $this.data('sample-key');
         
         if (typeof tiwsc_ajax === 'undefined') {
             console.error('tiwsc_ajax is undefined');
@@ -84,16 +137,36 @@ jQuery(document).ready(function($) {
         
         $.post(tiwsc_ajax.ajax_url, {
             action: 'tiwsc_remove_sample',
-            product_id: productId
+            product_id: productId,
+            sample_key: sampleKey
         }, function(response) {
             console.log('Remove response:', response);
             if (response.removed) {
-                // Update all instances of this product's button
-                var $allButtons = $('.tiwsc-free-sample-link[data-product-id="' + productId + '"]');
-                $allButtons.removeClass('tiwsc-added');
-                $allButtons.find('.tiwsc-free-sample-text').text('Gratis Kleurstaal');
-                // Update SVG to outline version
-                $allButtons.find('svg path:first-child').attr('fill', 'none').attr('stroke', '#222');
+                // Check if this is a variable product sample
+                if (sampleKey && sampleKey.indexOf('|') !== -1) {
+                    // Parse the sample key for variable products
+                    var parts = sampleKey.split('|');
+                    if (parts.length === 3) {
+                        var attrName = parts[1];
+                        var attrValue = parts[2];
+                        // Update variable product buttons
+                        var $variableButtons = $('.tiwsc-variable-sample-button[data-product-id="' + productId + '"][data-attribute-name="' + attrName + '"][data-attribute-value="' + attrValue + '"]');
+                        $variableButtons.removeClass('tiwsc-added');
+                        $variableButtons.each(function() {
+                            var colorName = $(this).data('color-name');
+                            $(this).find('.tiwsc-button-text').text(colorName);
+                        });
+                        // Update SVG to outline version
+                        $variableButtons.find('svg path:first-child').attr('fill', 'none').attr('stroke', '#333');
+                    }
+                } else {
+                    // Update simple product buttons
+                    var $allButtons = $('.tiwsc-free-sample-link[data-product-id="' + productId + '"]');
+                    $allButtons.removeClass('tiwsc-added');
+                    $allButtons.find('.tiwsc-free-sample-text').text('Gratis Kleurstaal');
+                    // Update SVG to outline version
+                    $allButtons.find('svg path:first-child').attr('fill', 'none').attr('stroke', '#222');
+                }
                 
                 // Reload sidebar content
                 loadSidebarContent();
@@ -131,6 +204,14 @@ jQuery(document).ready(function($) {
                     $('.tiwsc-free-sample-link').removeClass('tiwsc-added');
                     $('.tiwsc-free-sample-link .tiwsc-free-sample-text').text('Gratis Kleurstaal');
                     $('.tiwsc-free-sample-link svg path:first-child').attr('fill', 'none').attr('stroke', '#222');
+                    
+                    // Also clear variable product buttons
+                    $('.tiwsc-variable-sample-button').removeClass('tiwsc-added');
+                    $('.tiwsc-variable-sample-button').each(function() {
+                        var colorName = $(this).data('color-name');
+                        $(this).find('.tiwsc-button-text').text(colorName);
+                    });
+                    $('.tiwsc-variable-sample-button svg path:first-child').attr('fill', 'none').attr('stroke', '#333');
                 }, 2000);
             }
         }).fail(function(xhr, status, error) {
