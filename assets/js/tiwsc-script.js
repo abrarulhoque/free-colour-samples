@@ -160,6 +160,79 @@ jQuery(document).ready(function ($) {
     })
   })
 
+  // Add after existing variable-sample-button logic
+  $(document).on('click', '.tiwsc-variable-sample-main-button', function (e) {
+    e.preventDefault()
+    console.log('[TIWSC] Main variable sample button clicked')
+    var $this = $(this)
+    var productId = $this.data('product-id')
+    var attributeName = $this.data('attribute-name') // e.g., pa_color
+
+    // Find the closest variation form or fallback to global
+    var $form = $this.closest('form.variations_form')
+    if ($form.length === 0) {
+      $form = $('form.variations_form')
+    }
+    var attributeSelector = '[name="' + attributeName + '"]'
+    var attributeValue = $form.find(attributeSelector).val()
+
+    console.log('[TIWSC] attribute:', attributeName, 'value:', attributeValue)
+
+    if (!attributeValue) {
+      alert('Selecteer eerst een kleur.')
+      return
+    }
+
+    if (typeof tiwsc_ajax === 'undefined') {
+      console.error('tiwsc_ajax is undefined')
+      return
+    }
+
+    $.post(
+      tiwsc_ajax.ajax_url,
+      {
+        action: 'tiwsc_toggle_sample',
+        product_id: productId,
+        attribute: attributeName,
+        value: attributeValue
+      },
+      function (response) {
+        console.log('[TIWSC] toggle response:', response)
+        if (response.not_allowed) {
+          alert('Deze functie is niet beschikbaar.')
+          return
+        }
+        if (response.limit) {
+          alert(
+            response.message || 'Je kunt maximaal 5 kleurstalen selecteren.'
+          )
+          return
+        }
+
+        if (response.added) {
+          $this.addClass('tiwsc-added')
+          $this.find('.tiwsc-button-text').text('Toegevoegd')
+          $this
+            .find('svg path:first-child')
+            .attr('fill', '#88ae98')
+            .attr('stroke', '#88ae98')
+          // Auto-open sidebar
+          openSidebar()
+        } else {
+          $this.removeClass('tiwsc-added')
+          $this.find('.tiwsc-button-text').text('Gratis Kleurstaal')
+          $this
+            .find('svg path:first-child')
+            .attr('fill', 'none')
+            .attr('stroke', '#333')
+        }
+      },
+      'json'
+    ).fail(function (xhr, status, error) {
+      console.error('AJAX error:', status, error)
+    })
+  })
+
   // Open sidebar functionality
   $(document).on('click', '.tiwsc-open-sidebar-link', function (e) {
     e.preventDefault()
@@ -254,6 +327,32 @@ jQuery(document).ready(function ($) {
       console.error('AJAX error:', status, error)
     })
   })
+
+  // --- Extend remove-sample logic to reset main button ---
+  // Inside existing remove-sample success handler, before reloading sidebar
+  // We'll append after existing logic
+  if (response.removed) {
+    if (sampleKey && sampleKey.indexOf('|') !== -1) {
+      var parts = sampleKey.split('|')
+      if (parts.length === 3) {
+        var attrName = parts[1]
+        var attrValue = parts[2]
+        var $mainBtn = $(
+          '.tiwsc-variable-sample-main-button[data-product-id="' +
+            productId +
+            '"][data-attribute-name="' +
+            attrName +
+            '"]'
+        )
+        $mainBtn.removeClass('tiwsc-added')
+        $mainBtn.find('.tiwsc-button-text').text('Gratis Kleurstaal')
+        $mainBtn
+          .find('svg path:first-child')
+          .attr('fill', 'none')
+          .attr('stroke', '#333')
+      }
+    }
+  }
 
   // Submit form functionality
   $(document).on('submit', '#tiwsc-sample-form', function (e) {
