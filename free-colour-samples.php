@@ -406,7 +406,7 @@ function tiwsc_get_sidebar_callback() {
     if ($samples) {
         echo '<div class="tiwsc-selected-samples-list">';
         echo '<h2 style="margin-top:0;">' . __('Geselecteerde Kleurstalen', 'free-colour-samples') . '</h2>';
-        echo '<style>.tiwsc-color-chip{display:inline-block;width:14px;height:14px;margin-right:8px;border:1px solid #ccc;vertical-align:middle;border-radius:2px;background-size:cover;background-position:center;}</style>';
+        echo '<style>.tiwsc-color-chip{display:inline-block;width:40px;height:40px;margin-right:16px;border:1px solid #ddd;vertical-align:middle;border-radius:4px;background-size:cover;background-position:center;flex-shrink:0;}</style>';
         foreach ($samples as $sample_key) {
             // Parse the sample key
             if (strpos($sample_key, '|') !== false) {
@@ -423,22 +423,32 @@ function tiwsc_get_sidebar_callback() {
                 // Build a colour/image chip for the sidebar list
                 $chip_html = '';
                 if ( $term ) {
-                    // Try common meta keys used by swatch plugins
-                    $possible_keys = array( 'color', 'product_attribute_color', 'taxonomy_color' );
-                    $hex = '';
-                    foreach ( $possible_keys as $k ) {
-                        $hex = get_term_meta( $term->term_id, $k, true );
-                        if ( ! empty( $hex ) ) break;
-                    }
-
+                    // Check for variation swatches plugin meta keys first
+                    $hex = get_term_meta( $term->term_id, 'cfvsw_color', true );
+                    $image_url = get_term_meta( $term->term_id, 'cfvsw_image', true );
+                    
                     if ( $hex ) {
                         $chip_html = '<span class="tiwsc-color-chip" style="background:' . esc_attr( $hex ) . ';"></span>';
+                    } else if ( $image_url ) {
+                        $chip_html = '<span class="tiwsc-color-chip" style="background-image:url(' . esc_url( $image_url ) . ');"></span>';
                     } else {
-                        $thumb_id = get_term_meta( $term->term_id, 'thumbnail_id', true );
-                        if ( $thumb_id ) {
-                            $thumb_url = wp_get_attachment_image_url( $thumb_id, 'thumbnail' );
-                            if ( $thumb_url ) {
-                                $chip_html = '<span class="tiwsc-color-chip" style="background-image:url(' . esc_url( $thumb_url ) . ');"></span>';
+                        // Fallback to other common meta keys
+                        $possible_keys = array( 'color', 'product_attribute_color', 'taxonomy_color' );
+                        foreach ( $possible_keys as $k ) {
+                            $hex = get_term_meta( $term->term_id, $k, true );
+                            if ( ! empty( $hex ) ) {
+                                $chip_html = '<span class="tiwsc-color-chip" style="background:' . esc_attr( $hex ) . ';"></span>';
+                                break;
+                            }
+                        }
+                        
+                        if ( ! $chip_html ) {
+                            $thumb_id = get_term_meta( $term->term_id, 'thumbnail_id', true );
+                            if ( $thumb_id ) {
+                                $thumb_url = wp_get_attachment_image_url( $thumb_id, 'thumbnail' );
+                                if ( $thumb_url ) {
+                                    $chip_html = '<span class="tiwsc-color-chip" style="background-image:url(' . esc_url( $thumb_url ) . ');"></span>';
+                                }
                             }
                         }
                     }
@@ -452,13 +462,15 @@ function tiwsc_get_sidebar_callback() {
             }
             
             $image = get_the_post_thumbnail($product_id, 'thumbnail', [
-                'style' => 'width:56px;height:56px;object-fit:cover;margin-right:16px;vertical-align:middle;'
+                'style' => 'width:56px;height:56px;object-fit:cover;vertical-align:middle;'
             ]);
             echo '<div class="sample-prodcuct-img">';
             echo '<div class="sample-prodcuct-img-wrapper">';
+            echo '<div class="tiwsc-item-left-content">';
             echo $image;
             echo $chip_html;
-            echo '<span>' . esc_html($title) . '</span>';
+            echo '<span class="tiwsc-item-title">' . esc_html($title) . '</span>';
+            echo '</div>';
             echo '<a href="#" class="tiwsc-remove-sample" data-product-id="' . esc_attr($product_id) . '" data-sample-key="' . esc_attr($sample_key) . '" style="text-decoration:none;"><img width="auto" height="auto" src="' . plugins_url('assets/images/delete_icon.png', __FILE__) . '" alt="" /></a>';
             echo '</div>';
             echo '</div>';

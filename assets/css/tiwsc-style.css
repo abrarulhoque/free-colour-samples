@@ -75,7 +75,6 @@
 .sample-prodcuct-img img {
     max-height: 85px;
     width: auto;
-    margin-right: 20px;
 }
 .sample-prodcuct-img-wrapper {
     display: flex;
@@ -93,6 +92,18 @@
 }
 .sample-prodcuct-img span {
     padding-right: 5px;
+}
+.tiwsc-item-left-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+.tiwsc-item-title {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
 }
 #tiwsc-sidebar div[style*="display:flex"] {
     align-items: center;
