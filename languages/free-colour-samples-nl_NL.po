@@ -1,0 +1,240 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: free-colour-samples\n"
+"POT-Creation-Date: 2025-06-26 01:45+0500\n"
+"PO-Revision-Date: 2025-06-26 01:45+0500\n"
+"Last-Translator: \n"
+"Language-Team: umarehtisham365@gmail.com\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.6\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;esc_html__;esc_html_e;esc_attr__\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: free-colour-samples.php:33 free-colour-samples.php:34
+#: free-colour-samples.php:169 free-colour-samples.php:186
+#: free-colour-samples.php:205
+msgid "Free Colour Samples"
+msgstr ""
+
+#: free-colour-samples.php:51
+msgid "Settings saved."
+msgstr ""
+
+#: free-colour-samples.php:57
+msgid "Free Colour Samples Settings"
+msgstr ""
+
+#: free-colour-samples.php:61
+msgid "Enable Free Colour Sample functionality"
+msgstr ""
+
+#: free-colour-samples.php:65
+msgid "Admin Email for Form Submissions:"
+msgstr ""
+
+#: free-colour-samples.php:78 free-colour-samples.php:123
+#: free-colour-samples.php:152
+msgid "Free Colour Sample"
+msgstr ""
+
+#: free-colour-samples.php:84
+msgid "Show \"Free Colour Sample\" button for this product"
+msgstr ""
+
+#: free-colour-samples.php:123 free-colour-samples.php:152
+msgid "Added"
+msgstr ""
+
+#: free-colour-samples.php:254
+msgid "Selected Colour Samples"
+msgstr ""
+
+#: free-colour-samples.php:270
+msgid "Add more color samples"
+msgstr ""
+
+#: free-colour-samples.php:273
+msgid "No colour samples selected yet."
+msgstr ""
+
+#: free-colour-samples.php:277
+msgid "Complete application"
+msgstr ""
+
+#: free-colour-samples.php:279
+msgid "First name*"
+msgstr ""
+
+#: free-colour-samples.php:280
+msgid "Surname*"
+msgstr ""
+
+#: free-colour-samples.php:281
+msgid "Email address*"
+msgstr ""
+
+#: free-colour-samples.php:282 free-colour-samples.php:333
+msgid "Country"
+msgstr ""
+
+#: free-colour-samples.php:283
+msgid "Select Country *"
+msgstr ""
+
+#: free-colour-samples.php:284
+msgid "Netherlands"
+msgstr ""
+
+#: free-colour-samples.php:285
+msgid "Belgium"
+msgstr ""
+
+#: free-colour-samples.php:286
+msgid "Dutch"
+msgstr ""
+
+#: free-colour-samples.php:290
+msgid "Postal code*"
+msgstr ""
+
+#: free-colour-samples.php:291
+msgid "House number*"
+msgstr ""
+
+#: free-colour-samples.php:293
+msgid "Street name*"
+msgstr ""
+
+#: free-colour-samples.php:294
+msgid "Place of residence*"
+msgstr ""
+
+#: free-colour-samples.php:295
+msgid "Phone number"
+msgstr ""
+
+#: free-colour-samples.php:298
+#, php-format
+msgid "Make the %sright color choice%s"
+msgstr ""
+
+#: free-colour-samples.php:299
+#, php-format
+msgid "In the mail %stoday%s"
+msgstr ""
+
+#: free-colour-samples.php:300
+#, php-format
+msgid "These color samples are %sreally free%s"
+msgstr ""
+
+#: free-colour-samples.php:302
+msgid "Apply Now"
+msgstr ""
+
+#: free-colour-samples.php:307
+#, php-format
+msgid "By continuing you agree to our %sTerms &amp; Conditions%s"
+msgstr ""
+
+#: free-colour-samples.php:330
+msgid "First Name"
+msgstr ""
+
+#: free-colour-samples.php:331
+msgid "Surname"
+msgstr ""
+
+#: free-colour-samples.php:332
+msgid "Email Address"
+msgstr ""
+
+#: free-colour-samples.php:334
+msgid "Postal Code"
+msgstr ""
+
+#: free-colour-samples.php:335
+msgid "House Number"
+msgstr ""
+
+#: free-colour-samples.php:336
+msgid "Street Name"
+msgstr ""
+
+#: free-colour-samples.php:337
+msgid "Place of Residence"
+msgstr ""
+
+#: free-colour-samples.php:338
+msgid "Phone Number"
+msgstr ""
+
+#: free-colour-samples.php:340
+#, php-format
+msgid "%s is required."
+msgstr ""
+
+#: free-colour-samples.php:343
+msgid "Invalid email address."
+msgstr ""
+
+#: free-colour-samples.php:351
+#, php-format
+msgid ""
+"First Name: %s\n"
+"Surname: %s\n"
+"Email Address: %s\n"
+"Country: %s\n"
+"Postal Code: %s\n"
+"House Number: %s\n"
+"Street Name: %s\n"
+"Place of Residence: %s\n"
+"Phone Number: %s\n"
+"\n"
+"Selected Colour Samples:\n"
+msgstr ""
+
+#: free-colour-samples.php:360
+msgid "New Colour Sample Request"
+msgstr ""
+
+#: free-colour-samples.php:362
+msgid "Your Colour Sample Request Received"
+msgstr ""
+
+#: free-colour-samples.php:364
+#, php-format
+msgid ""
+"Dear %s %s,\n"
+"\n"
+"Thank you for your request. We have received the following "
+"information:\n"
+"\n"
+msgstr ""
+
+#: free-colour-samples.php:366
+msgid "We will send the colour samples as soon as possible."
+msgstr ""
+
+#: free-colour-samples.php:366
+msgid "Best regards,"
+msgstr ""
+
+#: free-colour-samples.php:366
+msgid "The Team"
+msgstr ""
+
+#: free-colour-samples.php:370
+msgid ""
+"Thank you for your request! We will send the colour samples as soon as "
+"possible. A confirmation email has been sent to you."
+msgstr ""
+
+#: free-colour-samples.php:402
+msgid "Back"
+msgstr ""
