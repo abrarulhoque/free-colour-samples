@@ -33,7 +33,14 @@ add_action('init', function() {
     
     // Clean up invalid product IDs from session
     if (isset($_SESSION['tiwsc_samples']) && is_array($_SESSION['tiwsc_samples'])) {
-        $_SESSION['tiwsc_samples'] = array_filter($_SESSION['tiwsc_samples'], function($product_id) {
+        $_SESSION['tiwsc_samples'] = array_filter($_SESSION['tiwsc_samples'], function($sample_key) {
+            // Handle both simple (numeric ID) and variable (product|attribute|value) keys
+            $product_id = $sample_key;
+            if (strpos($sample_key, '|') !== false) {
+                $parts = explode('|', $sample_key);
+                $product_id = $parts[0]; // First part is always the product ID
+            }
+
             return is_numeric($product_id) && get_post_status($product_id) !== false;
         });
         $_SESSION['tiwsc_samples'] = array_values($_SESSION['tiwsc_samples']); // Re-index array
