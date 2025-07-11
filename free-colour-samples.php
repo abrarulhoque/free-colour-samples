@@ -599,6 +599,8 @@ add_action('wp_ajax_nopriv_tiwsc_submit_sample_form', 'tiwsc_submit_sample_form_
 
 add_action('wp_enqueue_scripts', function() {
     if (!tiwsc_is_enabled()) return;
+    // Ensure session data available
+    tiwsc_safe_session_start();
     wp_enqueue_style(
         'tiwsc-style',
         plugins_url('assets/css/tiwsc-style.css', __FILE__),
@@ -609,11 +611,12 @@ add_action('wp_enqueue_scripts', function() {
         'tiwsc-script',
         plugins_url('assets/js/tiwsc-script.js', __FILE__),
         ['jquery'],
-        '1.1.0',
+        '1.2.0',
         true
     );
     wp_localize_script('tiwsc-script', 'tiwsc_ajax', [
-        'ajax_url' => admin_url('admin-ajax.php')
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'samples'  => isset($_SESSION['tiwsc_samples']) ? $_SESSION['tiwsc_samples'] : []
     ]);
 });
 
