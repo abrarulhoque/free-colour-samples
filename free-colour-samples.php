@@ -2,7 +2,7 @@
 /*
 Plugin Name: Free Colour Samples for WooCommerce
 Description: Adds a "Free Colour Sample" feature to WooCommerce products.
-Version: 1.1.0
+Version: 2.0.0
 Author: Expert Coders
 Text Domain: free-colour-samples
 Domain Path: /languages
