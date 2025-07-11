@@ -173,7 +173,7 @@ jQuery(document).ready(function ($) {
     if ($form.length === 0) {
       $form = $('form.variations_form')
     }
-    var attributeSelector = '[name="' + attributeName + '"]'
+    var attributeSelector = '[name="attribute_' + attributeName + '"]'
     var attributeValue = $form.find(attributeSelector).val()
 
     console.log('[TIWSC] attribute:', attributeName, 'value:', attributeValue)
@@ -320,6 +320,23 @@ jQuery(document).ready(function ($) {
 
           // Reload sidebar content
           loadSidebarContent()
+
+          // Also update the unified main button
+          var $mainBtn = $(
+            '.tiwsc-variable-sample-main-button[data-product-id="' +
+              productId +
+              '"][data-attribute-name="' +
+              attrName +
+              '"]'
+          )
+          if ($mainBtn.length) {
+            $mainBtn.removeClass('tiwsc-added')
+            $mainBtn.find('.tiwsc-button-text').text('Gratis Kleurstaal')
+            $mainBtn
+              .find('svg path:first-child')
+              .attr('fill', 'none')
+              .attr('stroke', '#333')
+          }
         }
       },
       'json'
@@ -327,32 +344,6 @@ jQuery(document).ready(function ($) {
       console.error('AJAX error:', status, error)
     })
   })
-
-  // --- Extend remove-sample logic to reset main button ---
-  // Inside existing remove-sample success handler, before reloading sidebar
-  // We'll append after existing logic
-  if (response.removed) {
-    if (sampleKey && sampleKey.indexOf('|') !== -1) {
-      var parts = sampleKey.split('|')
-      if (parts.length === 3) {
-        var attrName = parts[1]
-        var attrValue = parts[2]
-        var $mainBtn = $(
-          '.tiwsc-variable-sample-main-button[data-product-id="' +
-            productId +
-            '"][data-attribute-name="' +
-            attrName +
-            '"]'
-        )
-        $mainBtn.removeClass('tiwsc-added')
-        $mainBtn.find('.tiwsc-button-text').text('Gratis Kleurstaal')
-        $mainBtn
-          .find('svg path:first-child')
-          .attr('fill', 'none')
-          .attr('stroke', '#333')
-      }
-    }
-  }
 
   // Submit form functionality
   $(document).on('submit', '#tiwsc-sample-form', function (e) {
