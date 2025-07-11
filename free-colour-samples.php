@@ -156,19 +156,25 @@ function tiwsc_get_kleur_attribute($product) {
     }
     
     $attributes = $product->get_attributes();
-    $color_attr_slug = '';
-    
+    // Acceptable labels/slugs that represent a colour attribute in different languages
+    $acceptable_labels = array('kleur', 'color', 'colour');
+    $acceptable_slugs  = array('pa_kleur', 'pa_color', 'pa_colour', 'kleur', 'color', 'colour');
+
     foreach ($attributes as $attr_name => $attr_obj) {
-        $label = $attr_obj->is_taxonomy()
-            ? wc_attribute_label($attr_obj->get_taxonomy())
-            : $attr_obj->get_name();
-        
-        if (strtolower($label) === 'kleur') {
-            $color_attr_slug = $attr_obj->is_taxonomy() ? $attr_obj->get_taxonomy() : sanitize_title($label);
-            return $color_attr_slug;
+        // Get the human readable label
+        $label = $attr_obj->is_taxonomy() ? wc_attribute_label($attr_obj->get_taxonomy()) : $attr_obj->get_name();
+        $label_normalized = strtolower($label);
+
+        // Determine the slug that WooCommerce uses internally
+        $slug = $attr_obj->is_taxonomy() ? $attr_obj->get_taxonomy() : sanitize_title($label);
+        $slug_normalized = strtolower($slug);
+
+        if (in_array($label_normalized, $acceptable_labels) || in_array($slug_normalized, $acceptable_slugs)) {
+            // Return the taxonomy slug if available, otherwise the generated slug
+            return $attr_obj->is_taxonomy() ? $attr_obj->get_taxonomy() : sanitize_title($label);
         }
     }
-    
+
     return false;
 }
 
