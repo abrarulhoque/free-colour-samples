@@ -210,7 +210,6 @@ jQuery(document).ready(function ($) {
         }
 
         if (response.added) {
-          pushSampleKey(productId, attributeName, attributeValue)
           $this.addClass('tiwsc-added')
           $this.find('.tiwsc-button-text').text('Toegevoegd')
           $this
@@ -220,7 +219,6 @@ jQuery(document).ready(function ($) {
           // Auto-open sidebar
           openSidebar()
         } else {
-          removeSampleKey(productId, attributeName, attributeValue)
           $this.removeClass('tiwsc-added')
           $this.find('.tiwsc-button-text').text('Gratis Kleurstaal')
           $this
@@ -228,7 +226,6 @@ jQuery(document).ready(function ($) {
             .attr('fill', 'none')
             .attr('stroke', '#333')
         }
-        updateMainButtonState()
       },
       'json'
     ).fail(function (xhr, status, error) {
@@ -340,7 +337,6 @@ jQuery(document).ready(function ($) {
               .attr('fill', 'none')
               .attr('stroke', '#333')
           }
-          updateMainButtonState()
         }
       },
       'json'
@@ -514,80 +510,5 @@ jQuery(document).ready(function ($) {
       $('.tiwsc-open-sidebar-link').length,
       'sidebar open links'
     )
-  }
-
-  // Maintain in-memory list of current samples from PHP session
-  var tiwscSamples = Array.isArray(tiwsc_ajax.samples)
-    ? tiwsc_ajax.samples.slice()
-    : []
-
-  function buildSampleKey (productId, attrName, attrValue) {
-    return productId + '|' + attrName + '|' + attrValue
-  }
-
-  function isSampleAdded (productId, attrName, attrValue) {
-    var key = buildSampleKey(productId, attrName, attrValue)
-    return tiwscSamples.indexOf(key) !== -1
-  }
-
-  function updateMainButtonState () {
-    var $btn = $('.tiwsc-variable-sample-main-button')
-    if ($btn.length === 0) return
-    var productId = $btn.data('product-id')
-    var attributeName = $btn.data('attribute-name')
-
-    var $form = $btn.closest('form.variations_form')
-    if ($form.length === 0) {
-      $form = $('form.variations_form')
-    }
-    var attributeSelector = '[name="attribute_' + attributeName + '"]'
-    var attributeValue = $form.find(attributeSelector).val()
-
-    if (
-      attributeValue &&
-      isSampleAdded(productId, attributeName, attributeValue)
-    ) {
-      // Already added -> show Added state
-      $btn.addClass('tiwsc-added')
-      $btn.find('.tiwsc-button-text').text('Toegevoegd')
-      $btn
-        .find('svg path:first-child')
-        .attr('fill', '#88ae98')
-        .attr('stroke', '#88ae98')
-    } else {
-      // Not yet added
-      $btn.removeClass('tiwsc-added')
-      $btn.find('.tiwsc-button-text').text('Gratis Kleurstaal')
-      $btn
-        .find('svg path:first-child')
-        .attr('fill', 'none')
-        .attr('stroke', '#333')
-    }
-  }
-
-  // Update on page load
-  updateMainButtonState()
-
-  // Update when variation selection changes
-  $('form.variations_form').on(
-    'found_variation reset_data change',
-    function () {
-      updateMainButtonState()
-    }
-  )
-
-  // Update sample list array after toggle
-  function pushSampleKey (productId, attrName, attrValue) {
-    var key = buildSampleKey(productId, attrName, attrValue)
-    if (tiwscSamples.indexOf(key) === -1) {
-      tiwscSamples.push(key)
-    }
-  }
-
-  function removeSampleKey (productId, attrName, attrValue) {
-    var key = buildSampleKey(productId, attrName, attrValue)
-    tiwscSamples = tiwscSamples.filter(function (k) {
-      return k !== key
-    })
   }
 })

@@ -406,6 +406,7 @@ function tiwsc_get_sidebar_callback() {
     if ($samples) {
         echo '<div class="tiwsc-selected-samples-list">';
         echo '<h2 style="margin-top:0;">' . __('Geselecteerde Kleurstalen', 'free-colour-samples') . '</h2>';
+        echo '<style>.tiwsc-color-chip{display:inline-block;width:14px;height:14px;margin-right:8px;border:1px solid #ccc;vertical-align:middle;border-radius:2px;background-size:cover;background-position:center;}</style>';
         foreach ($samples as $sample_key) {
             // Parse the sample key
             if (strpos($sample_key, '|') !== false) {
@@ -418,6 +419,30 @@ function tiwsc_get_sidebar_callback() {
                 $term = get_term_by('slug', $value, $attribute);
                 $color_name = $term ? $term->name : $value;
                 $title = $product->get_title() . ' - ' . $color_name;
+
+                // Build a colour/image chip for the sidebar list
+                $chip_html = '';
+                if ( $term ) {
+                    // Try common meta keys used by swatch plugins
+                    $possible_keys = array( 'color', 'product_attribute_color', 'taxonomy_color' );
+                    $hex = '';
+                    foreach ( $possible_keys as $k ) {
+                        $hex = get_term_meta( $term->term_id, $k, true );
+                        if ( ! empty( $hex ) ) break;
+                    }
+
+                    if ( $hex ) {
+                        $chip_html = '<span class="tiwsc-color-chip" style="background:' . esc_attr( $hex ) . ';"></span>';
+                    } else {
+                        $thumb_id = get_term_meta( $term->term_id, 'thumbnail_id', true );
+                        if ( $thumb_id ) {
+                            $thumb_url = wp_get_attachment_image_url( $thumb_id, 'thumbnail' );
+                            if ( $thumb_url ) {
+                                $chip_html = '<span class="tiwsc-color-chip" style="background-image:url(' . esc_url( $thumb_url ) . ');"></span>';
+                            }
+                        }
+                    }
+                }
             } else {
                 // Simple product
                 $product_id = $sample_key;
@@ -432,6 +457,7 @@ function tiwsc_get_sidebar_callback() {
             echo '<div class="sample-prodcuct-img">';
             echo '<div class="sample-prodcuct-img-wrapper">';
             echo $image;
+            echo $chip_html;
             echo '<span>' . esc_html($title) . '</span>';
             echo '<a href="#" class="tiwsc-remove-sample" data-product-id="' . esc_attr($product_id) . '" data-sample-key="' . esc_attr($sample_key) . '" style="text-decoration:none;"><img width="auto" height="auto" src="' . plugins_url('assets/images/delete_icon.png', __FILE__) . '" alt="" /></a>';
             echo '</div>';
@@ -599,8 +625,6 @@ add_action('wp_ajax_nopriv_tiwsc_submit_sample_form', 'tiwsc_submit_sample_form_
 
 add_action('wp_enqueue_scripts', function() {
     if (!tiwsc_is_enabled()) return;
-    // Ensure session data available
-    tiwsc_safe_session_start();
     wp_enqueue_style(
         'tiwsc-style',
         plugins_url('assets/css/tiwsc-style.css', __FILE__),
@@ -611,12 +635,11 @@ add_action('wp_enqueue_scripts', function() {
         'tiwsc-script',
         plugins_url('assets/js/tiwsc-script.js', __FILE__),
         ['jquery'],
-        '1.2.0',
+        '1.1.0',
         true
     );
     wp_localize_script('tiwsc-script', 'tiwsc_ajax', [
-        'ajax_url' => admin_url('admin-ajax.php'),
-        'samples'  => isset($_SESSION['tiwsc_samples']) ? $_SESSION['tiwsc_samples'] : []
+        'ajax_url' => admin_url('admin-ajax.php')
     ]);
 });
 
