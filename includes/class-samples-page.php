@@ -108,7 +108,8 @@ class TIWSC_Samples_Page {
         );
         
         $products = get_posts($args);
-        $samples = array();
+        $product_groups = array();
+        $total_samples = 0;
         
         foreach ($products as $product_post) {
             $product = wc_get_product($product_post->ID);
@@ -123,6 +124,7 @@ class TIWSC_Samples_Page {
             }
             
             $color_terms = wc_get_product_terms($product->get_id(), $color_attr_slug, array('fields' => 'all'));
+            $filtered_colors = array();
             
             foreach ($color_terms as $term) {
                 $master_color = TIWSC_Colour_Map::normalize_colour($term->slug);
@@ -138,28 +140,40 @@ class TIWSC_Samples_Page {
                 $image_url = get_term_meta($term->term_id, 'cfvsw_image', true);
                 
                 if ($hex) {
-                    $chip_html = '<span class="tiwsc-grid-swatch" style="background:' . esc_attr($hex) . ';"></span>';
+                    $chip_html = '<span class="tiwsc-color-chip" style="background:' . esc_attr($hex) . ';"></span>';
                 } else if ($image_url) {
-                    $chip_html = '<span class="tiwsc-grid-swatch" style="background-image:url(' . esc_url($image_url) . ');"></span>';
+                    $chip_html = '<span class="tiwsc-color-chip" style="background-image:url(' . esc_url($image_url) . ');"></span>';
                 } else {
-                    // Fallback to product image
-                    $product_image = get_the_post_thumbnail_url($product->get_id(), 'thumbnail');
-                    if ($product_image) {
-                        $chip_html = '<span class="tiwsc-grid-swatch" style="background-image:url(' . esc_url($product_image) . ');"></span>';
-                    } else {
-                        $chip_html = '<span class="tiwsc-grid-swatch" style="background:#ddd;"></span>';
-                    }
+                    // Fallback to a simple colored square
+                    $chip_html = '<span class="tiwsc-color-chip" style="background:#ddd;"></span>';
                 }
                 
-                $samples[] = array(
-                    'product_id' => $product->get_id(),
-                    'product_title' => $product->get_title(),
+                $filtered_colors[] = array(
                     'color_name' => $term->name,
                     'color_slug' => $term->slug,
-                    'attribute' => $color_attr_slug,
                     'master_color' => $master_color,
                     'chip_html' => $chip_html,
                     'sample_key' => $product->get_id() . '|' . $color_attr_slug . '|' . $term->slug
+                );
+                $total_samples++;
+            }
+            
+            // Only add product if it has colors after filtering
+            if (!empty($filtered_colors)) {
+                // Get product price
+                $price_html = $product->get_price_html();
+                if (empty($price_html)) {
+                    $price_html = '<span class="price">' . __('Prijs op aanvraag', 'free-colour-samples') . '</span>';
+                }
+                
+                $product_groups[] = array(
+                    'product_id' => $product->get_id(),
+                    'product_title' => $product->get_title(),
+                    'product_image' => get_the_post_thumbnail_url($product->get_id(), 'woocommerce_thumbnail'),
+                    'product_url' => get_permalink($product->get_id()),
+                    'price_html' => $price_html,
+                    'attribute' => $color_attr_slug,
+                    'colors' => $filtered_colors
                 );
             }
         }
@@ -171,30 +185,47 @@ class TIWSC_Samples_Page {
         $session_samples = isset($_SESSION['tiwsc_samples']) ? $_SESSION['tiwsc_samples'] : array();
         
         ob_start();
-        if (empty($samples)) {
+        if (empty($product_groups)) {
             ?>
             <div class="tiwsc-no-results">
                 <p><?php _e('Geen kleurstalen gevonden met de geselecteerde filters.', 'free-colour-samples'); ?></p>
             </div>
             <?php
         } else {
-            foreach ($samples as $sample) {
-                $is_added = in_array($sample['sample_key'], $session_samples);
+            foreach ($product_groups as $group) {
                 ?>
-                <div class="tiwsc-grid-item" data-master-color="<?php echo esc_attr($sample['master_color']); ?>">
-                    <?php echo $sample['chip_html']; ?>
-                    <div class="tiwsc-grid-item-info">
-                        <h4><?php echo esc_html($sample['color_name']); ?></h4>
-                        <p class="tiwsc-product-name"><?php echo esc_html($sample['product_title']); ?></p>
-                        <button type="button" 
-                                class="tiwsc-grid-sample-button <?php echo $is_added ? 'tiwsc-added' : ''; ?>"
-                                data-product-id="<?php echo esc_attr($sample['product_id']); ?>"
-                                data-attribute-name="<?php echo esc_attr($sample['attribute']); ?>"
-                                data-attribute-value="<?php echo esc_attr($sample['color_slug']); ?>"
-                                data-color-name="<?php echo esc_attr($sample['color_name']); ?>">
-                            <span class="tiwsc-button-icon">+</span>
-                            <?php echo $is_added ? __('Toegevoegd', 'free-colour-samples') : __('Toevoegen', 'free-colour-samples'); ?>
-                        </button>
+                <div class="tiwsc-product-card">
+                    <div class="tiwsc-product-header">
+                        <?php if ($group['product_image']): ?>
+                            <img src="<?php echo esc_url($group['product_image']); ?>" alt="<?php echo esc_attr($group['product_title']); ?>" class="tiwsc-product-image">
+                        <?php endif; ?>
+                        <div class="tiwsc-product-info">
+                            <h3 class="tiwsc-product-title">
+                                <a href="<?php echo esc_url($group['product_url']); ?>" target="_blank">
+                                    <?php echo esc_html($group['product_title']); ?>
+                                </a>
+                            </h3>
+                            <div class="tiwsc-product-price"><?php echo $group['price_html']; ?></div>
+                        </div>
+                    </div>
+                    <div class="tiwsc-color-grid">
+                        <?php foreach ($group['colors'] as $color): 
+                            $is_added = in_array($color['sample_key'], $session_samples);
+                        ?>
+                            <div class="tiwsc-color-item" data-master-color="<?php echo esc_attr($color['master_color']); ?>">
+                                <?php echo $color['chip_html']; ?>
+                                <span class="tiwsc-color-name"><?php echo esc_html($color['color_name']); ?></span>
+                                <button type="button" 
+                                        class="tiwsc-add-sample-btn <?php echo $is_added ? 'tiwsc-added' : ''; ?>"
+                                        data-product-id="<?php echo esc_attr($group['product_id']); ?>"
+                                        data-attribute-name="<?php echo esc_attr($group['attribute']); ?>"
+                                        data-attribute-value="<?php echo esc_attr($color['color_slug']); ?>"
+                                        data-color-name="<?php echo esc_attr($color['color_name']); ?>"
+                                        title="<?php echo $is_added ? __('Toegevoegd aan kleurstalen', 'free-colour-samples') : __('Toevoegen aan kleurstalen', 'free-colour-samples'); ?>">
+                                    <?php echo $is_added ? __('TOEGEVOEGD', 'free-colour-samples') : __('+ TOEVOEGEN', 'free-colour-samples'); ?>
+                                </button>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
                 <?php
@@ -205,7 +236,7 @@ class TIWSC_Samples_Page {
         
         wp_send_json(array(
             'html' => $html,
-            'count' => count($samples)
+            'count' => $total_samples
         ));
     }
     

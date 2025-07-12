@@ -302,6 +302,17 @@ jQuery(document).ready(function ($) {
                 .attr('fill', 'none')
                 .attr('stroke', '#333')
             }
+            // Also update samples page buttons
+            var $samplePageButtons = $(
+              '.tiwsc-add-sample-btn[data-product-id="' +
+                productId +
+                '"][data-attribute-name="' +
+                attrName +
+                '"][data-attribute-value="' +
+                attrValue +
+                '"]'
+            )
+            $samplePageButtons.removeClass('tiwsc-added').html('+ TOEVOEGEN')
           } else {
             // Update simple product buttons
             var $allButtons = $(
@@ -391,6 +402,9 @@ jQuery(document).ready(function ($) {
           $('.tiwsc-variable-sample-button svg path:first-child')
             .attr('fill', 'none')
             .attr('stroke', '#333')
+            
+          // Clear samples page buttons
+          $('.tiwsc-add-sample-btn').removeClass('tiwsc-added').html('+ TOEVOEGEN')
         }, 2000)
       }
     }).fail(function (xhr, status, error) {
