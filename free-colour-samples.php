@@ -10,6 +10,19 @@ Domain Path: /languages
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+// Define plugin constants
+define('TIWSC_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('TIWSC_PLUGIN_URL', plugin_dir_url(__FILE__));
+
+// Load required files
+require_once TIWSC_PLUGIN_DIR . 'includes/class-colour-map.php';
+require_once TIWSC_PLUGIN_DIR . 'includes/class-samples-page.php';
+
+// Initialize samples page
+add_action('init', function() {
+    new TIWSC_Samples_Page();
+});
+
 // Load text domain for translations
 add_action('plugins_loaded', 'tiwsc_load_textdomain');
 function tiwsc_load_textdomain() {
