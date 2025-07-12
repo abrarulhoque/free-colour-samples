@@ -17,8 +17,8 @@ jQuery(document).ready(function($) {
         loadSamplesGrid();
     });
     
-    // Handle sample button clicks
-    $(document).on('click', '.tiwsc-grid-sample-button', function(e) {
+    // Handle sample button clicks (updated for new class)
+    $(document).on('click', '.tiwsc-add-sample-btn', function(e) {
         e.preventDefault();
         var $button = $(this);
         var productId = $button.data('product-id');
@@ -26,7 +26,7 @@ jQuery(document).ready(function($) {
         var attributeValue = $button.data('attribute-value');
         var colorName = $button.data('color-name');
         
-        console.log('[TIWSC] Grid sample button clicked', {
+        console.log('[TIWSC] Add sample button clicked', {
             productId: productId,
             attribute: attributeName,
             value: attributeValue
@@ -55,7 +55,7 @@ jQuery(document).ready(function($) {
                 }
                 
                 if (response.added) {
-                    $button.addClass('tiwsc-added').html('Toegevoegd');
+                    $button.addClass('tiwsc-added').html('TOEGEVOEGD');
                     // Open sidebar
                     if (typeof openSidebar === 'function') {
                         openSidebar();
@@ -64,7 +64,7 @@ jQuery(document).ready(function($) {
                         $('.tiwsc-open-sidebar-link').first().trigger('click');
                     }
                 } else {
-                    $button.removeClass('tiwsc-added').html('<span class="tiwsc-button-icon">+</span>Toevoegen');
+                    $button.removeClass('tiwsc-added').html('+ TOEVOEGEN');
                 }
             },
             'json'
@@ -110,14 +110,14 @@ jQuery(document).ready(function($) {
                 // Update count
                 $('.tiwsc-count-number').text(response.count);
                 
-                // Animate grid items
-                $('.tiwsc-grid-item').each(function(index) {
+                // Animate product cards
+                $('.tiwsc-product-card').each(function(index) {
                     $(this).css({
                         opacity: 0,
                         transform: 'translateY(20px)'
-                    }).delay(index * 30).animate({
+                    }).delay(index * 50).animate({
                         opacity: 1
-                    }, 300).css({
+                    }, 400).css({
                         transform: 'translateY(0)'
                     });
                 });
