@@ -28,6 +28,8 @@ class TIWSC_Samples_Page {
             <div class="tiwsc-samples-layout">
                 <!-- Left panel: Filters -->
                 <div class="tiwsc-filters-panel">
+                    <!-- Mobile close button -->
+                    <button type="button" class="tiwsc-mobile-filter-close" aria-label="Sluiten">&times;</button>
                     <h3><?php _e('Filter op kleur', 'free-colour-samples'); ?></h3>
                     <div class="tiwsc-filter-checkboxes">
                         <?php
@@ -70,6 +72,8 @@ class TIWSC_Samples_Page {
                         <div class="tiwsc-sample-count">
                             <span class="tiwsc-count-number">0</span> <?php _e('kleurstalen gevonden', 'free-colour-samples'); ?>
                         </div>
+                        <!-- Mobile: filter toggle button -->
+                        <button type="button" class="tiwsc-mobile-filter-toggle" aria-label="Filter">&#9776; <?php _e('Filter', 'free-colour-samples'); ?></button>
                     </div>
                     <div id="tiwsc-samples-grid" class="tiwsc-samples-grid">
                         <div class="tiwsc-loading">
