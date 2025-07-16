@@ -660,7 +660,7 @@ add_action('wp_enqueue_scripts', function() {
         'tiwsc-script',
         plugins_url('assets/js/tiwsc-script.js', __FILE__),
         ['jquery'],
-        '1.1.0',
+        '1.1.1',
         true
     );
     wp_localize_script('tiwsc-script', 'tiwsc_ajax', [

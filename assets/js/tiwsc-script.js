@@ -24,6 +24,17 @@ jQuery(document).ready(function ($) {
   $('form.variations_form').on('reset_data', function () {
     console.log('[TIWSC] reset_data event fired')
   })
+  
+  // Listen for clicks on variation swatches to ensure compatibility
+  $(document).on('click', '.cfvsw-swatches-option', function() {
+    console.log('[TIWSC] Swatch clicked:', $(this).attr('data-slug'))
+    // Small delay to ensure the swatch plugin has updated the select
+    setTimeout(function() {
+      // Trigger change on the select to ensure WooCommerce updates
+      var $form = $('form.variations_form')
+      $form.find('select').trigger('change')
+    }, 50)
+  })
 
   // Check if sidebar elements exist
   console.log('Sidebar element exists:', $('#tiwsc-sidebar').length)
@@ -174,28 +185,63 @@ jQuery(document).ready(function ($) {
       $form = $('form.variations_form')
     }
     var attributeSelector = '[name="attribute_' + attributeName + '"]'
-    var attributeValue =
-      $form.find(attributeSelector).val() || // select
-      $form.find(attributeSelector + ':checked').val() || // radio
-      $form
-        .find(
-          '[swatches-attr="attribute_' +
-            attributeName +
-            '"] .cfvsw-selected-swatch'
-        )
-        .data('slug') || // variation swatches (CartFlows)
-      $form
-        .find(
-          '[data-attribute_name="attribute_' +
-            attributeName +
-            '"] .selected, [data-attribute_name="attribute_' +
-            attributeName +
-            '"] .active'
-        )
-        .data('value') || // other swatch plugins
-      '' // nothing picked
+    
+    // First try to get value from the select element
+    var attributeValue = $form.find(attributeSelector).val()
+    
+    // If no value from select, try different swatch plugin selectors
+    if (!attributeValue) {
+      // Debug: log all available swatches containers
+      console.log('[TIWSC] Looking for swatches with attribute:', attributeName)
+      console.log('[TIWSC] Form:', $form)
+      console.log('[TIWSC] Swatches containers:', $form.find('[swatches-attr]'))
+      
+      // Try variation swatches plugin (cfvsw) - check multiple possible attribute formats
+      var possibleSelectors = [
+        '[swatches-attr="attribute_' + attributeName + '"] .cfvsw-selected-swatch',
+        '[swatches-attr="' + attributeName + '"] .cfvsw-selected-swatch', // Sometimes without attribute_ prefix
+        '.cfvsw-swatches-container[swatches-attr="attribute_' + attributeName + '"] .cfvsw-selected-swatch',
+        '.cfvsw-swatches-container[swatches-attr="' + attributeName + '"] .cfvsw-selected-swatch'
+      ]
+      
+      for (var i = 0; i < possibleSelectors.length; i++) {
+        var $selectedSwatch = $form.find(possibleSelectors[i])
+        if ($selectedSwatch.length > 0) {
+          attributeValue = $selectedSwatch.attr('data-slug') || $selectedSwatch.data('slug') || $selectedSwatch.attr('data-value')
+          console.log('[TIWSC] Found cfvsw swatch with selector:', possibleSelectors[i], 'value:', attributeValue)
+          break
+        }
+      }
+      
+      // If still not found, try searching globally (outside form)
+      if (!attributeValue) {
+        for (var i = 0; i < possibleSelectors.length; i++) {
+          var $selectedSwatch = $(possibleSelectors[i])
+          if ($selectedSwatch.length > 0) {
+            attributeValue = $selectedSwatch.attr('data-slug') || $selectedSwatch.data('slug') || $selectedSwatch.attr('data-value')
+            console.log('[TIWSC] Found cfvsw swatch globally with selector:', possibleSelectors[i], 'value:', attributeValue)
+            break
+          }
+        }
+      }
+      
+      // If still no value, try other common swatch plugin selectors
+      if (!attributeValue) {
+        var $otherSwatch = $form.find('[data-attribute_name="attribute_' + attributeName + '"] .selected, [data-attribute_name="attribute_' + attributeName + '"] .active')
+        if ($otherSwatch.length > 0) {
+          attributeValue = $otherSwatch.attr('data-value') || $otherSwatch.data('value')
+          console.log('[TIWSC] Found other swatch:', attributeValue)
+        }
+      }
+      
+      // Try radio buttons
+      if (!attributeValue) {
+        attributeValue = $form.find(attributeSelector + ':checked').val()
+      }
+    }
 
     console.log('[TIWSC] attribute:', attributeName, 'value:', attributeValue)
+    console.log('[TIWSC] Selected swatch element:', $form.find('[swatches-attr="attribute_' + attributeName + '"] .cfvsw-selected-swatch'))
 
     if (!attributeValue) {
       alert('Selecteer eerst een kleur.')
