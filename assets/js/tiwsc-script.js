@@ -177,6 +177,15 @@ jQuery(document).ready(function ($) {
     var attributeValue =
       $form.find(attributeSelector).val() || // select
       $form.find(attributeSelector + ':checked').val() || // radio
+      $form
+        .find(
+          '[data-attribute_name="attribute_' +
+            attributeName +
+            '"] .selected, [data-attribute_name="attribute_' +
+            attributeName +
+            '"] .active'
+        )
+        .data('value') || // image swatch plugins
       '' // nothing picked
 
     console.log('[TIWSC] attribute:', attributeName, 'value:', attributeValue)
