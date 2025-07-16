@@ -179,13 +179,20 @@ jQuery(document).ready(function ($) {
       $form.find(attributeSelector + ':checked').val() || // radio
       $form
         .find(
+          '[swatches-attr="attribute_' +
+            attributeName +
+            '"] .cfvsw-selected-swatch'
+        )
+        .data('slug') || // variation swatches (CartFlows)
+      $form
+        .find(
           '[data-attribute_name="attribute_' +
             attributeName +
             '"] .selected, [data-attribute_name="attribute_' +
             attributeName +
             '"] .active'
         )
-        .data('value') || // image swatch plugins
+        .data('value') || // other swatch plugins
       '' // nothing picked
 
     console.log('[TIWSC] attribute:', attributeName, 'value:', attributeValue)
