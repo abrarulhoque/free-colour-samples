@@ -174,7 +174,10 @@ jQuery(document).ready(function ($) {
       $form = $('form.variations_form')
     }
     var attributeSelector = '[name="attribute_' + attributeName + '"]'
-    var attributeValue = $form.find(attributeSelector).val()
+    var attributeValue =
+      $form.find(attributeSelector).val() || // select
+      $form.find(attributeSelector + ':checked').val() || // radio
+      '' // nothing picked
 
     console.log('[TIWSC] attribute:', attributeName, 'value:', attributeValue)
 
@@ -402,9 +405,11 @@ jQuery(document).ready(function ($) {
           $('.tiwsc-variable-sample-button svg path:first-child')
             .attr('fill', 'none')
             .attr('stroke', '#333')
-            
+
           // Clear samples page buttons
-          $('.tiwsc-add-sample-btn').removeClass('tiwsc-added').html('+ TOEVOEGEN')
+          $('.tiwsc-add-sample-btn')
+            .removeClass('tiwsc-added')
+            .html('+ TOEVOEGEN')
         }, 2000)
       }
     }).fail(function (xhr, status, error) {
