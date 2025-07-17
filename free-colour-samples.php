@@ -29,8 +29,15 @@ function tiwsc_load_textdomain() {
     load_plugin_textdomain('free-colour-samples', false, dirname(plugin_basename(__FILE__)) . '/languages');
 }
 
+// Check if the Free Colour Samples feature is enabled.
+// If the option has never been saved before, default to "yes" so the
+// functionality works out-of-the-box. Only an explicit "no" in the database will disable
+// the feature.
 function tiwsc_is_enabled() {
-    return get_option('tiwsc_enable_samples') === 'yes';
+    // Provide a default value of "yes" to get_option so that the first run
+    // behaves as enabled. Only an explicit "no" in the database will disable
+    // the feature.
+    return get_option('tiwsc_enable_samples', 'yes') === 'yes';
 }
 
 add_action('init', function() {
