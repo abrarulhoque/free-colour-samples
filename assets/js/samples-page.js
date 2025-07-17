@@ -39,7 +39,7 @@ jQuery(document).ready(function ($) {
     closeMobileFilters()
   })
 
-  // Handle filter changes
+  // Handle filter changes (both color and category)
   $('.tiwsc-filter-checkbox input').on('change', function () {
     console.log('[TIWSC] Filter changed')
     loadSamplesGrid()
@@ -114,13 +114,20 @@ jQuery(document).ready(function ($) {
   function loadSamplesGrid () {
     console.log('[TIWSC] Loading samples grid')
 
-    // Get selected filters
+    // Get selected color filters
     var filters = []
-    $('.tiwsc-filter-checkbox input:checked').each(function () {
+    $('.tiwsc-filter-checkboxes input:checked').each(function () {
       filters.push($(this).val())
     })
 
-    console.log('[TIWSC] Active filters:', filters)
+    // Get selected category filters
+    var categoryFilters = []
+    $('.tiwsc-category-checkboxes input:checked').each(function () {
+      categoryFilters.push($(this).val())
+    })
+
+    console.log('[TIWSC] Active color filters:', filters)
+    console.log('[TIWSC] Active category filters:', categoryFilters)
 
     // Show loading state
     $('#tiwsc-samples-grid').html(
@@ -136,6 +143,7 @@ jQuery(document).ready(function ($) {
       {
         action: 'tiwsc_get_samples_grid',
         filters: filters,
+        category_filters: categoryFilters,
         nonce: tiwsc_samples_ajax.nonce
       },
       function (response) {
