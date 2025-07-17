@@ -30,8 +30,36 @@ class TIWSC_Samples_Page {
                 <div class="tiwsc-filters-panel">
                     <!-- Mobile close button -->
                     <button type="button" class="tiwsc-mobile-filter-close" aria-label="Sluiten">&times;</button>
-                    <h3><?php _e('Filter op kleur', 'free-colour-samples'); ?></h3>
-                    <div class="tiwsc-filter-checkboxes">
+                    
+                    <!-- Category Filter -->
+                    <div class="tiwsc-filter-section">
+                        <h3><?php _e('Categorie', 'free-colour-samples'); ?></h3>
+                        <div class="tiwsc-category-checkboxes">
+                            <?php
+                            // Get all product categories
+                            $product_categories = get_terms(array(
+                                'taxonomy' => 'product_cat',
+                                'orderby' => 'name',
+                                'hide_empty' => true,
+                                'exclude' => array(get_option('default_product_cat'))
+                            ));
+                            
+                            foreach ($product_categories as $category) {
+                                ?>
+                                <label class="tiwsc-filter-checkbox">
+                                    <input type="checkbox" name="category_filter[]" value="<?php echo esc_attr($category->term_id); ?>" />
+                                    <span class="tiwsc-filter-label"><?php echo esc_html($category->name); ?></span>
+                                </label>
+                                <?php
+                            }
+                            ?>
+                        </div>
+                    </div>
+                    
+                    <!-- Color Filter -->
+                    <div class="tiwsc-filter-section">
+                        <h3><?php _e('Kleur', 'free-colour-samples'); ?></h3>
+                        <div class="tiwsc-filter-checkboxes">
                         <?php
                         $master_colours = TIWSC_Colour_Map::get_master_colours();
                         $colour_hex_map = array(
@@ -61,7 +89,9 @@ class TIWSC_Samples_Page {
                             <?php
                         }
                         ?>
+                        </div>
                     </div>
+                    
                     <button type="button" class="tiwsc-clear-filters"><?php _e('Filters wissen', 'free-colour-samples'); ?></button>
                 </div>
                 
@@ -97,6 +127,7 @@ class TIWSC_Samples_Page {
         }
         
         $filters = isset($_POST['filters']) ? array_map('sanitize_text_field', $_POST['filters']) : array();
+        $category_filters = isset($_POST['category_filters']) ? array_map('intval', $_POST['category_filters']) : array();
         
         // Get all variable products with color samples enabled
         $args = array(
@@ -110,6 +141,18 @@ class TIWSC_Samples_Page {
                 )
             )
         );
+        
+        // Add category filter if categories are selected
+        if (!empty($category_filters)) {
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => 'product_cat',
+                    'field' => 'term_id',
+                    'terms' => $category_filters,
+                    'operator' => 'IN'
+                )
+            );
+        }
         
         $products = get_posts($args);
         $product_groups = array();
