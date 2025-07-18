@@ -132,6 +132,7 @@ class TIWSC_Samples_Page {
         // Get all variable products with color samples enabled
         $args = array(
             'post_type' => 'product',
+            'post_status' => 'publish', // only published products
             'posts_per_page' => -1,
             'meta_query' => array(
                 array(
@@ -147,9 +148,10 @@ class TIWSC_Samples_Page {
             $args['tax_query'] = array(
                 array(
                     'taxonomy' => 'product_cat',
-                    'field' => 'term_id',
-                    'terms' => $category_filters,
-                    'operator' => 'IN'
+                    'field'    => 'term_id',
+                    'terms'    => $category_filters,
+                    'operator' => 'IN',
+                    'include_children' => true // explicitly include child categories
                 )
             );
         }
@@ -161,7 +163,15 @@ class TIWSC_Samples_Page {
         foreach ($products as $product_post) {
             $product = wc_get_product($product_post->ID);
             
-            if (!$product || !$product->is_type('variable')) {
+            // initialize variable to avoid undefined warnings in static analysis
+            $color_attr_slug = '';
+            
+            if ( ! $product ) {
+                continue;
+            }
+            
+            // allow both variable and simple product types
+            if ( ! $product->is_type( array( 'variable', 'simple' ) ) ) {
                 continue;
             }
             
