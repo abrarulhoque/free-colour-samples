@@ -308,7 +308,7 @@ jQuery(document).ready(function ($) {
   // Close sidebar functionality
   $(document).on(
     'click',
-    '#tiwsc-sidebar-close, #tiwsc-sidebar-overlay',
+    '.tiwsc-close-trigger, #tiwsc-sidebar-overlay',
     function (e) {
       e.preventDefault()
       console.log('Close sidebar clicked')

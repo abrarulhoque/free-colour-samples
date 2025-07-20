@@ -491,11 +491,13 @@ function tiwsc_get_sidebar_callback() {
             echo $chip_html;
             echo '<span class="tiwsc-item-title">' . esc_html($title) . '</span>';
             echo '</div>';
-            echo '<a href="#" class="tiwsc-remove-sample" data-product-id="' . esc_attr($product_id) . '" data-sample-key="' . esc_attr($sample_key) . '" style="text-decoration:none;"><img width="auto" height="auto" src="' . plugins_url('assets/images/delete_icon.png', __FILE__) . '" alt="" /></a>';
+            echo '<a href="#" class="tiwsc-remove-sample" data-product-id="' . esc_attr($product_id) . '" data-sample-key="' . esc_attr($sample_key) . '" style="text-decoration:none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </a>';
             echo '</div>';
             echo '</div>';
         }
-        echo '<button class="add-more-clr-btn" id="tiwsc-sidebar-close">' . __('Voeg meer kleurstalen toe', 'free-colour-samples') . '</button>';
+        echo '<button class="add-more-clr-btn tiwsc-close-trigger">' . __('Voeg meer kleurstalen toe', 'free-colour-samples') . '</button>';
         echo '</div>'; 
     } else {
         echo '<div class="no-product-select"><h3>' . __('Nog geen kleurstalen geselecteerd.', 'free-colour-samples') . '</h3></div>';
@@ -592,7 +594,10 @@ function tiwsc_submit_sample_form_callback() {
     ];
     
     foreach ($field_labels as $field => $label) {
-        if (empty($field)) $errors[] = $label . ' ' . __('is verplicht.', 'free-colour-samples');
+        // Validate the actual user-submitted data rather than the field key name.
+        if (empty($_POST[$field])) {
+            $errors[] = $label . ' ' . __('is verplicht.', 'free-colour-samples');
+        }
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = __('Ongeldig e-mailadres.', 'free-colour-samples');
@@ -686,65 +691,32 @@ add_action('wp_footer', function() {
         </button>
     </div>
     
-    <div id="tiwsc-sidebar-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:99998;opacity:0;transition:opacity 0.3s ease;"></div>
-    <div id="tiwsc-sidebar" style="position:fixed;top:0;left:-500px;width:500px;max-width:100vw;height:100vh;background:#fff;z-index:99999;overflow-y:auto;transition:left 0.3s ease;box-shadow:5px 0 15px rgba(0,0,0,0.2);">
+    <div id="tiwsc-sidebar-overlay"></div>
+    <div id="tiwsc-sidebar">
         <div class="tiwsc-sidebar-header" style="position:sticky;top:0;z-index:100000;">
-            <button class="sidebar-close-btn" id="tiwsc-sidebar-close">×</button>
+            <button class="sidebar-close-btn tiwsc-close-trigger" id="tiwsc-sidebar-header-close">×</button>
             <img width="auto" height="auto" src="https://rolenhor.nl/wp-content/uploads/2025/04/Rol-hor-logo-wit.png.webp" alt="" />
         </div>
         <div id="tiwsc-sidebar-content"></div>
     </div>
-    <style>
-    #tiwsc-sidebar.tiwsc-sidebar-open {
-        left: 0 !important;
-    }
-    #tiwsc-sidebar-overlay.tiwsc-overlay-open {
-        opacity: 1 !important;
-        display: block !important;
-    }
-    body.tiwsc-sidebar-active {
-        overflow: hidden;
-    }
-    .tiwsc-sidebar-header {
-        padding: 20px;
-        background: #88ae98;
-        color: white;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
-        z-index: 100000;
-    }
-    .sidebar-close-btn {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        font-size: 32px;
-        font-weight: bold;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: background-color 0.2s;
-    }
-    .sidebar-close-btn:hover {
-        background-color: rgba(255,255,255,0.2);
-    }
-    .tiwsc-sidebar-wrapper {
-        padding: 20px 0;
-    }
-    @media (max-width: 768px) {
-        #tiwsc-sidebar {
-            width: 100vw !important;
-            max-width: 100vw !important;
-            left: -100vw !important;
-        }
-    }
-    </style>
+    <!-- Styles moved to assets/css/tiwsc-style.css -->
     <?php
+});
+
+// Shortcode for easy placement of sidebar trigger in theme header or elsewhere
+add_shortcode('tiwsc_sidebar_trigger', function($atts){
+    if (!tiwsc_is_enabled()) return '';
+    $defaults = array(
+        'label' => __('Gratis Kleurstalen', 'free-colour-samples'),
+    );
+    $atts = shortcode_atts($defaults, $atts, 'tiwsc_sidebar_trigger');
+    ob_start();
+    ?>
+    <a href="#" class="tiwsc-open-sidebar-link tiwsc-header-sidebar-trigger" style="display:inline-flex;align-items:center;gap:6px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="m6,19c0,.552-.448,1-1,1s-1-.448-1-1,.448-1,1-1,1,.448,1,1Z" fill="none" stroke="#333"/><path d="M24,14v10H5c-2.757,0-5-2.243-5-5V0h10v6.929l4.899-4.9,7.071,7.071-4.899,4.899h6.929ZM9.95,19.708l10.607-10.607-5.657-5.657-4.899,4.9v10.657c0,.24-.017.476-.05.708ZM1,6h8V1H1v5Zm0,6h8v-5H1v5Zm8,7v-6H1v6c0,2.209,1.791,4,4,4s4-1.791,4-4Zm14-4h-6.929l-7.536,7.536c-.169.169-.347.323-.535.464h14.999v-8Z" fill="#333"/></svg>
+        <span><?php echo esc_html($atts['label']); ?></span>
+    </a>
+    <?php
+    return ob_get_clean();
 });
 ?>

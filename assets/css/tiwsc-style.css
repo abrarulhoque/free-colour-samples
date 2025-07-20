@@ -2,15 +2,48 @@
 #tiwsc-sidebar, #tiwsc-sidebar-content, .tiwsc-form-section, #tiwsc-sidebar h2, #tiwsc-sidebar .terms {
     font-family: 'Inter', Arial, Helvetica, sans-serif !important;
 }
+/* Sidebar base positioning */
 #tiwsc-sidebar {
+    position: fixed;
+    top: 0;
+    left: -500px;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 99999;
+    transition: left 0.3s ease;
     background: #fff;
-    box-shadow: -4px 0 24px 0 rgba(0,0,0,0.13);
+    box-shadow: -4px 0 24px 0 rgba(0, 0, 0, 0.13);
     border-radius: 0;
     max-width: 420px;
     width: 100%;
     min-width: 320px;
-    transition: box-shadow 0.2s;
     padding: 0;
+}
+
+/* Overlay that darkens the background */
+#tiwsc-sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 99998;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Active/open modifiers set via JS */
+#tiwsc-sidebar.tiwsc-sidebar-open {
+    left: 0 !important;
+}
+#tiwsc-sidebar-overlay.tiwsc-overlay-open {
+    display: block !important;
+    opacity: 1 !important;
+}
+body.tiwsc-sidebar-active {
+    overflow: hidden;
 }
 .tiwsc-sidebar-header,
 .sample-prodcuct-img,
@@ -71,6 +104,12 @@
 }
 #tiwsc-sidebar .tiwsc-remove-sample:hover {
     color: #88ae98;
+}
+#tiwsc-sidebar .tiwsc-remove-sample svg {
+    stroke: #cc0000;
+}
+#tiwsc-sidebar .tiwsc-remove-sample:hover svg {
+    stroke: #ff1a1a;
 }
 .sample-prodcuct-img img {
     max-height: 85px;
@@ -343,17 +382,4 @@
     }
 }
 
-/* Debug styles - remove these after testing */
-.tiwsc-open-sidebar-link {
-    border: 2px solid red !important;
-    background: yellow !important;
-    padding: 10px !important;
-}
-
-#tiwsc-sidebar {
-    /* Removed blue border */
-}
-
-#tiwsc-sidebar-overlay {
-    border: 3px solid green !important;
-}
+/* End debug cleanup */
