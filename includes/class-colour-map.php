@@ -1,271 +1,163 @@
 <?php
 /**
- * Color mapping utility class
- * Maps various color names/slugs to 14 master categories
+ * Color mapping utility class (Version 2.0 - Definitive)
+ * Maps various color names/slugs to 14 master categories with performance and accuracy in mind.
  */
 
 if (!defined('ABSPATH')) exit;
 
 class TIWSC_Colour_Map {
-    
+
     /**
-     * Get the master color categories
+     * Get the 14 master color categories and their display names.
      */
     public static function get_master_colours() {
         return array(
             'antraciet' => __('Antraciet', 'free-colour-samples'),
-            'beige' => __('Beige', 'free-colour-samples'),
-            'blauw' => __('Blauw', 'free-colour-samples'),
-            'bruin' => __('Bruin', 'free-colour-samples'),
-            'geel' => __('Geel', 'free-colour-samples'),
-            'goud' => __('Goud', 'free-colour-samples'),
-            'grijs' => __('Grijs', 'free-colour-samples'),
-            'groen' => __('Groen', 'free-colour-samples'),
-            'oranje' => __('Oranje', 'free-colour-samples'),
-            'paars' => __('Paars', 'free-colour-samples'),
-            'rood' => __('Rood', 'free-colour-samples'),
-            'roze' => __('Roze', 'free-colour-samples'),
-            'wit' => __('Wit', 'free-colour-samples'),
-            'zwart' => __('Zwart', 'free-colour-samples')
+            'beige'     => __('Beige',  'free-colour-samples'),
+            'blauw'     => __('Blauw',  'free-colour-samples'),
+            'bruin'     => __('Bruin',  'free-colour-samples'),
+            'geel'      => __('Geel',   'free-colour-samples'),
+            'goud'      => __('Goud',   'free-colour-samples'),
+            'grijs'     => __('Grijs',  'free-colour-samples'),
+            'groen'     => __('Groen',  'free-colour-samples'),
+            'oranje'    => __('Oranje', 'free-colour-samples'),
+            'paars'     => __('Paars',  'free-colour-samples'),
+            'rood'      => __('Rood',   'free-colour-samples'),
+            'roze'      => __('Roze',   'free-colour-samples'),
+            'wit'       => __('Wit',    'free-colour-samples'),
+            'zwart'     => __('Zwart',  'free-colour-samples')
         );
     }
-    
+
     /**
-     * Get the color mapping array
-     * Maps various color names/slugs to master categories
+     * Get the comprehensive color mapping array.
+     * This is the single source of truth for all known color aliases.
      */
     public static function get_colour_mappings() {
-        return array(
-            // Antraciet
-            'antraciet' => 'antraciet',
-            'anthracite' => 'antraciet',
-            'charcoal' => 'antraciet',
-            'anthraciet' => 'antraciet',
-            'antraciet-50' => 'antraciet',
-            
-            // Beige
-            'beige' => 'beige',
-            'cream' => 'beige',
-            'sand' => 'beige',
-            'light-beige' => 'beige',
-            'dark-beige' => 'beige',
-            'taupe' => 'beige',
-            'camel' => 'beige',
-            'khaki' => 'beige',
-            'ecru' => 'beige',
-            'ivory' => 'beige',
-            'cappuccino' => 'beige',
-            'latte' => 'beige',
-            'beige-001' => 'beige',
-            'taupe-001' => 'beige',
-            'caramel-001' => 'beige',
-            
-            // Blauw
-            'blauw' => 'blauw',
-            'blue' => 'blauw',
-            'navy' => 'blauw',
-            'royal-blue' => 'blauw',
-            'light-blue' => 'blauw',
-            'dark-blue' => 'blauw',
-            'sky-blue' => 'blauw',
-            'indigo' => 'blauw',
-            'cobalt' => 'blauw',
-            'steel-blue' => 'blauw',
-            'midnight-blue' => 'blauw',
-            'denim' => 'blauw',
-            'turquoise' => 'blauw',
-            'teal' => 'blauw',
-            
-            // Bruin
-            'bruin' => 'bruin',
-            'brown' => 'bruin',
-            'chocolate' => 'bruin',
-            'light-brown' => 'bruin',
-            'dark-brown' => 'bruin',
-            'chestnut' => 'bruin',
-            'mocha' => 'bruin',
-            'espresso' => 'bruin',
-            'mahogany' => 'bruin',
-            'walnut' => 'bruin',
-            'hazelnut' => 'bruin',
-            'bronze' => 'bruin',
-            'rust' => 'bruin',
-            'sienna' => 'bruin',
-            'umber' => 'bruin',
-            'chocolate-001' => 'bruin',
-            'mokka-001' => 'bruin',
-            
-            // Geel
-            'geel' => 'geel',
-            'yellow' => 'geel',
-            'gold' => 'geel',
-            'mustard' => 'geel',
-            'lemon' => 'geel',
-            'honey' => 'geel',
-            'amber' => 'geel',
-            'golden' => 'geel',
-            'saffron' => 'geel',
-            'sunshine' => 'geel',
-            'canary' => 'geel',
-            
-            // Goud
-            'goud' => 'goud',
-            'golden' => 'goud',
-            'brass' => 'goud',
-            'champagne' => 'goud',
-            'metallic-gold' => 'goud',
-            
-            // Grijs
-            'grijs' => 'grijs',
-            'grey' => 'grijs',
-            'gray' => 'grijs',
-            'silver' => 'grijs',
-            'light-grey' => 'grijs',
-            'dark-grey' => 'grijs',
-            'charcoal-grey' => 'grijs',
-            'slate' => 'grijs',
-            'ash' => 'grijs',
-            'stone' => 'grijs',
-            'pewter' => 'grijs',
-            'smoke' => 'grijs',
-            'graphite' => 'grijs',
-            'steel' => 'grijs',
-            'titanium' => 'grijs',
-            'granite' => 'grijs',
-            'iron-grey' => 'grijs',
-            'pearl-grey' => 'grijs',
-            'mouse-grey' => 'grijs',
-            'dove-grey' => 'grijs',
-            'grijs-beige' => 'grijs',
-            'zand-beige' => 'grijs',
-            
-            // Groen
-            'groen' => 'groen',
-            'green' => 'groen',
-            'olive' => 'groen',
-            'forest-green' => 'groen',
-            'light-green' => 'groen',
-            'dark-green' => 'groen',
-            'lime' => 'groen',
-            'mint' => 'groen',
-            'emerald' => 'groen',
-            'jade' => 'groen',
-            'sage' => 'groen',
-            'pine' => 'groen',
-            'moss' => 'groen',
-            'army-green' => 'groen',
-            'hunter-green' => 'groen',
-            'sea-green' => 'groen',
-            
-            // Oranje
-            'oranje' => 'oranje',
-            'orange' => 'oranje',
-            'tangerine' => 'oranje',
-            'coral' => 'oranje',
-            'peach' => 'oranje',
-            'apricot' => 'oranje',
-            'burnt-orange' => 'oranje',
-            'terracotta' => 'oranje',
-            'pumpkin' => 'oranje',
-            'salmon' => 'oranje',
-            
-            // Paars
-            'paars' => 'paars',
-            'purple' => 'paars',
-            'violet' => 'paars',
-            'lavender' => 'paars',
-            'plum' => 'paars',
-            'magenta' => 'paars',
-            'burgundy' => 'paars',
-            'wine' => 'paars',
-            'maroon' => 'paars',
-            'eggplant' => 'paars',
-            'mauve' => 'paars',
-            'lilac' => 'paars',
-            'orchid' => 'paars',
-            
-            // Rood
-            'rood' => 'rood',
-            'red' => 'rood',
-            'crimson' => 'rood',
-            'scarlet' => 'rood',
-            'ruby' => 'rood',
-            'cherry' => 'rood',
-            'rose' => 'rood',
-            'blood-red' => 'rood',
-            'fire-red' => 'rood',
-            'brick-red' => 'rood',
-            'cardinal' => 'rood',
-            'vermillion' => 'rood',
-            
-            // Roze
-            'roze' => 'roze',
-            'pink' => 'roze',
-            'rose' => 'roze',
-            'blush' => 'roze',
-            'fuchsia' => 'roze',
-            'hot-pink' => 'roze',
-            'light-pink' => 'roze',
-            'baby-pink' => 'roze',
-            'powder-pink' => 'roze',
-            'dusty-rose' => 'roze',
-            'ballet-pink' => 'roze',
-            
-            // Wit
-            'wit' => 'wit',
-            'white' => 'wit',
-            'snow' => 'wit',
-            'pearl' => 'wit',
-            'off-white' => 'wit',
-            'cream-white' => 'wit',
-            'snow-white' => 'wit',
-            'pure-white' => 'wit',
-            'arctic-white' => 'wit',
-            'vanilla' => 'wit',
-            'alabaster' => 'wit',
-            'porcelain' => 'wit',
-            
-            // Zwart
-            'zwart' => 'zwart',
-            'black' => 'zwart',
-            'jet-black' => 'zwart',
-            'midnight' => 'zwart',
-            'onyx' => 'zwart',
-            'raven' => 'zwart',
-            'obsidian' => 'zwart',
-            'pitch-black' => 'zwart',
-            'ebony' => 'zwart',
-            'soot' => 'zwart',
-            'coal' => 'zwart'
-        );
+        static $mappings = null;
+        if ($mappings === null) {
+            $mappings = array(
+                // ANTRACIET
+                'antraciet' => 'antraciet', 'anthracite' => 'antraciet', 'antrasiet' => 'antraciet',
+                'donkergrijs' => 'antraciet', 'dark-greige' => 'antraciet', 'griseo' => 'antraciet',
+                'charcoal' => 'antraciet', 'smokey-grey' => 'antraciet', 'smoke-grey' => 'antraciet',
+                'stone-ash' => 'antraciet', 'carbon' => 'antraciet', 'shadow' => 'antraciet',
+                'donker-grijs' => 'antraciet', 'carbon-express' => 'antraciet',
+
+                // BEIGE
+                'beige' => 'beige', 'light-beige' => 'beige', 'dark-beige' => 'beige', 'zand' => 'beige',
+                'sand' => 'beige', 'ecru' => 'beige', 'taupe' => 'beige', 'khaki' => 'beige',
+                'cappuccino' => 'beige', 'latte' => 'beige', 'creme' => 'beige', 'cream' => 'beige',
+                'ivory' => 'beige', 'linnen' => 'beige', 'schelp' => 'beige', 'burlywood' => 'beige',
+                'corn-silk' => 'beige', 'sterrenstof-beige' => 'beige',
+                'zand-1' => 'beige', 'zand-beige' => 'beige', 'light-greige' => 'beige', 'royal-clay-klei' => 'beige',
+                'vanille' => 'beige', 'soleado' => 'beige', 'cascara' => 'beige', 'naturel' => 'beige',
+                'grijs-beige' => 'beige', 'taupe-1' => 'beige',
+
+                // BLAUW
+                'blauw' => 'blauw', 'blue' => 'blauw', 'navy' => 'blauw', 'denim' => 'blauw',
+                'marineblauw' => 'blauw', 'royal-blue-mat' => 'blauw', 'hemelsblauw' => 'blauw',
+                'medium-blue-mat' => 'blauw', 'staalblauw-metallic' => 'blauw',
+
+                // BRUIN
+                'bruin' => 'bruin', 'brown' => 'bruin', 'beech-beuken' => 'bruin', 'esdoorn' => 'bruin',
+                'kastanje' => 'bruin', 'light-oak-eik' => 'bruin', 'wengee' => 'bruin', 'wenge' => 'bruin',
+                'black-coffee' => 'bruin', 'cacao-bean' => 'bruin', 'dark-chocolate' => 'bruin',
+                'eik' => 'bruin', 'maple-esdoorn' => 'bruin', 'pecannoot' => 'bruin', 'walnoot' => 'bruin',
+                'walnoot-2' => 'bruin', 'castana' => 'bruin', 'nogal' => 'bruin', 'nuez' => 'bruin',
+                'donker-bruin' => 'bruin', 'sienna-matt' => 'bruin', 'gember' => 'bruin', 'java' => 'bruin',
+                'cedro' => 'bruin', 'cottage-pine' => 'bruin', 'gouden-eik' => 'bruin', 'houtlook' => 'bruin',
+                'brons' => 'bruin', 'bronsbruin' => 'bruin', 'koffie' => 'bruin', 'mocca' => 'bruin',
+                'tiger-eye' => 'bruin',
+
+                // GEEL
+                'geel' => 'geel', 'yellow' => 'geel', 'mustard' => 'geel', 'lemon-chiffon' => 'geel', 'honing' => 'geel',
+
+                // GOUD
+                'goud' => 'goud', 'gold' => 'goud', 'golden-rod' => 'goud', 'light-goldenrod' => 'goud',
+                'sterrenstof-goud' => 'goud', 'champagne' => 'goud', 'koper' => 'goud',
+
+                // GRIJS
+                'grijs' => 'grijs', 'grey' => 'grijs', 'gray' => 'grijs', 'lichtgrijs' => 'grijs', 'licht-grijs' => 'grijs',
+                'grey-shadow' => 'grijs', 'limestone' => 'grijs', 'stone-grey' => 'grijs', 'zilver' => 'grijs',
+                'silver' => 'grijs', 'zilver-matt' => 'grijs', 'zilver-metallic' => 'grijs',
+                'sterrenstof-zilver' => 'grijs', 'grijs-mat' => 'grijs', 'atmosfeer' => 'grijs',
+                'oester' => 'grijs', 'staal' => 'grijs', 'stone' => 'grijs', 'betongrijs' => 'grijs',
+                'zilvergrijs' => 'grijs', 'silverwhite' => 'grijs', 'nube' => 'grijs', 'cloud-1' => 'grijs', 'marmer' => 'grijs',
+
+                // GROEN
+                'groen' => 'groen', 'green' => 'groen', 'donker-zeegroen-mat' => 'groen',
+                'donkergroen-mat' => 'groen', 'lichtgroen-mat' => 'groen', 'pale-green' => 'groen',
+
+                // ORANJE
+                'oranje' => 'oranje', 'orange' => 'oranje', 'peachpuff-matt' => 'oranje',
+
+                // PAARS
+                'paars' => 'paars', 'purple' => 'paars', 'lavendel-blush-mat' => 'paars',
+                'violet-red-metallic' => 'paars', 'violet-red' => 'paars',
+
+                // ROOD
+                'rood' => 'rood', 'red' => 'rood', 'cherry-kers' => 'rood', 'crimson' => 'rood', 'donkerrood-mat' => 'rood',
+                'stardust-rosy-brown' => 'rood', 'rosa' => 'rood',
+
+                // ROZE
+                'roze' => 'roze', 'pink' => 'roze',
+
+                // WIT
+                'wit' => 'wit', 'white' => 'wit', 'parel-wit' => 'wit', 'gebroken-wit' => 'wit', 'offwhite' => 'wit',
+                'stone-white' => 'wit', 'antiek-wit' => 'wit', 'ghost-white' => 'wit',
+                'mint-creme-wit' => 'wit', 'snow-mat' => 'wit', 'albast-mat' => 'wit',
+                'ivoor' => 'wit', 'blanco' => 'wit', 'antiek-wit-mat' => 'wit', 'wit-1' => 'wit',
+
+                // ZWART
+                'zwart' => 'zwart', 'black' => 'zwart', 'zwart-1' => 'zwart', 'nacht-zwart' => 'zwart',
+            );
+        }
+        return $mappings;
     }
-    
+
     /**
-     * Normalize a color name/slug to a master category
+     * Normalize a color term slug to a master category using a performant, prioritized matching process.
+     *
+     * @param string $term_slug The color term slug to normalize (e.g., 'light-oak-eik' or '11000-05-beige').
+     * @return string The master color slug (e.g., 'bruin' or 'beige').
      */
-    public static function normalize_colour($term) {
+    public static function normalize_colour($term_slug) {
+        // A static cache for the sorted keys to prevent re-sorting on every call.
+        static $sorted_keys = null;
+
         $mappings = self::get_colour_mappings();
-        $normalized_term = strtolower(sanitize_title($term));
-        
-        // Direct mapping
-        if (isset($mappings[$normalized_term])) {
-            return $mappings[$normalized_term];
+        $normalized_slug = strtolower(sanitize_title($term_slug));
+
+        // Priority 1: Check for an exact match in our mapping keys. This is the fastest and most accurate path.
+        if (isset($mappings[$normalized_slug])) {
+            return $mappings[$normalized_slug];
         }
-        
-        // Try without numbers at the end
-        $term_without_numbers = preg_replace('/-?\d+$/', '', $normalized_term);
-        if (isset($mappings[$term_without_numbers])) {
-            return $mappings[$term_without_numbers];
+
+        // Initialize and cache the sorted keys only once per request.
+        if ($sorted_keys === null) {
+            $sorted_keys = array_keys($mappings);
+            // Sort keys by length (descending) to match longer, more specific keys first (e.g., 'donkergrijs' before 'grijs').
+            usort($sorted_keys, function($a, $b) {
+                return strlen($b) - strlen($a);
+            });
         }
-        
-        // Try partial matches for compound colors
-        foreach ($mappings as $color_key => $master_color) {
-            if (strpos($normalized_term, $color_key) !== false) {
-                return $master_color;
+
+        // Priority 2: Iterate through the pre-sorted keys to find the first (and best) partial match.
+        // This handles complex slugs like '11000-01-creme' by finding the 'creme' part.
+        foreach ($sorted_keys as $key) {
+            if (strpos($normalized_slug, $key) !== false) {
+                return $mappings[$key];
             }
         }
-        
-        // Default to grijs if no match found
+
+        // Log unmapped colors for future improvement. Check your debug.log.
+        if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+            error_log('[Free Colour Samples] Unmapped color term slug: ' . $term_slug . ' (normalized: ' . $normalized_slug . ')');
+        }
+
+        // Fallback to 'grijs' if no match is found after all checks.
         return 'grijs';
     }
 }

@@ -623,23 +623,63 @@ function tiwsc_submit_sample_form_callback() {
             __('Woonplaats', 'free-colour-samples') . ": $place_of_residence\n" .
             __('Land', 'free-colour-samples') . ": $country\n\n" .
             __('Geselecteerde Kleurstalen:', 'free-colour-samples') . "\n";
-    
-    foreach ($samples as $sample_key) {
-        if (strpos($sample_key, '|') !== false) {
-            // Variable product: product_id|attribute|value
-            list($product_id, $attribute, $value) = explode('|', $sample_key);
-            $product = wc_get_product($product_id);
-            if ($product) {
-                $term = get_term_by('slug', $value, $attribute);
-                $color_name = $term ? $term->name : $value;
-                $body .= "- " . $product->get_title() . " - " . $color_name . "\n";
+
+            // Build structured sample details for email body and potential Hub integration
+            $samples_for_email = array();
+            // This array is now ready for your Hub JSON payload
+            $samples_for_hub   = array();
+
+            foreach ($samples as $sample_key) {
+                $product_title = '';
+                $color_name    = __('N/A', 'free-colour-samples');
+                $master_color  = 'onbekend';
+
+                if (strpos($sample_key, '|') !== false) {
+                    // Variable product: product_id|attribute|value
+                    list($product_id, $attribute, $value) = explode('|', $sample_key);
+                    $product = wc_get_product($product_id);
+                    if ($product) {
+                        $term        = get_term_by('slug', $value, $attribute);
+                        $color_name  = $term ? $term->name : $value;
+                        $product_title = $product->get_title();
+                        // Resolve the master colour using the robust function
+                        $master_color = TIWSC_Colour_Map::normalize_colour($value);
+                    }
+                } else {
+                    // Simple product
+                    $product_id = $sample_key;
+                    $product = wc_get_product($product_id);
+                    if ($product) {
+                        $product_title = $product->get_title();
+                        // Simple products have no colour terms; mark accordingly
+                        $color_name   = __('Standaard productstaal', 'free-colour-samples');
+                        $master_color = 'n.v.t.';
+                    }
+                }
+
+                if ($product_title) {
+                    // Prepare line item for email body
+                    $samples_for_email[] = "- " . $product_title . " - " . $color_name . " (Hoofdkleur: " . ucfirst($master_color) . ")";
+
+                    // Structured data for future Hub payload
+                    $samples_for_hub[] = array(
+                        'product_id'    => intval($product_id),
+                        'product_title' => $product_title,
+                        'color_name'    => $color_name,
+                        'master_color'  => $master_color,
+                        'sample_key'    => $sample_key,
+                    );
+                }
             }
-        } else {
-            // Simple product
-            $product = wc_get_product($sample_key);
-            if ($product) $body .= "- " . $product->get_title() . "\n";
-        }
-    }
+
+            // Append all sample lines to the email body
+            $body .= implode("\n", $samples_for_email);
+
+            // TODO: Implement the Hub POST call here using $samples_for_hub
+            // if (get_option('..._hub_url')) {
+            //     $payload = ['customer' => ..., 'samples' => $samples_for_hub];
+            //     wp_remote_post(...);
+            // }
 
     $admin_email = get_option('tiwsc_admin_email', get_option('admin_email'));
     wp_mail($admin_email, __('Nieuwe Kleurstaal Aanvraag', 'free-colour-samples'), $body);
