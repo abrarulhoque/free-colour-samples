@@ -1,7 +1,8 @@
 <?php
 /**
- * Color mapping utility class (Version 2.0 - Definitive)
+ * Color mapping utility class (Version 2.1 - Final Polished)
  * Maps various color names/slugs to 14 master categories with performance and accuracy in mind.
+ * Addresses underscore vs. hyphen edge cases.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -14,25 +15,24 @@ class TIWSC_Colour_Map {
     public static function get_master_colours() {
         return array(
             'antraciet' => __('Antraciet', 'free-colour-samples'),
-            'beige'     => __('Beige',  'free-colour-samples'),
-            'blauw'     => __('Blauw',  'free-colour-samples'),
-            'bruin'     => __('Bruin',  'free-colour-samples'),
-            'geel'      => __('Geel',   'free-colour-samples'),
-            'goud'      => __('Goud',   'free-colour-samples'),
-            'grijs'     => __('Grijs',  'free-colour-samples'),
-            'groen'     => __('Groen',  'free-colour-samples'),
+            'beige'     => __('Beige', 'free-colour-samples'),
+            'blauw'     => __('Blauw', 'free-colour-samples'),
+            'bruin'     => __('Bruin', 'free-colour-samples'),
+            'geel'      => __('Geel', 'free-colour-samples'),
+            'goud'      => __('Goud', 'free-colour-samples'),
+            'grijs'     => __('Grijs', 'free-colour-samples'),
+            'groen'     => __('Groen', 'free-colour-samples'),
             'oranje'    => __('Oranje', 'free-colour-samples'),
-            'paars'     => __('Paars',  'free-colour-samples'),
-            'rood'      => __('Rood',   'free-colour-samples'),
-            'roze'      => __('Roze',   'free-colour-samples'),
-            'wit'       => __('Wit',    'free-colour-samples'),
-            'zwart'     => __('Zwart',  'free-colour-samples')
+            'paars'     => __('Paars', 'free-colour-samples'),
+            'rood'      => __('Rood', 'free-colour-samples'),
+            'roze'      => __('Roze', 'free-colour-samples'),
+            'wit'       => __('Wit', 'free-colour-samples'),
+            'zwart'     => __('Zwart', 'free-colour-samples')
         );
     }
 
     /**
      * Get the comprehensive color mapping array.
-     * This is the single source of truth for all known color aliases.
      */
     public static function get_colour_mappings() {
         static $mappings = null;
@@ -105,7 +105,7 @@ class TIWSC_Colour_Map {
                 'roze' => 'roze', 'pink' => 'roze',
 
                 // WIT
-                'wit' => 'wit', 'white' => 'wit', 'parel-wit' => 'wit', 'gebroken-wit' => 'wit', 'offwhite' => 'wit',
+                'wit' => 'wit', 'white' => 'wit', 'parel-wit' => 'wit', 'pearl-white' => 'wit', 'gebroken-wit' => 'wit', 'offwhite' => 'wit',
                 'stone-white' => 'wit', 'antiek-wit' => 'wit', 'ghost-white' => 'wit',
                 'mint-creme-wit' => 'wit', 'snow-mat' => 'wit', 'albast-mat' => 'wit',
                 'ivoor' => 'wit', 'blanco' => 'wit', 'antiek-wit-mat' => 'wit', 'wit-1' => 'wit',
@@ -119,45 +119,39 @@ class TIWSC_Colour_Map {
 
     /**
      * Normalize a color term slug to a master category using a performant, prioritized matching process.
-     *
-     * @param string $term_slug The color term slug to normalize (e.g., 'light-oak-eik' or '11000-05-beige').
-     * @return string The master color slug (e.g., 'bruin' or 'beige').
      */
     public static function normalize_colour($term_slug) {
-        // A static cache for the sorted keys to prevent re-sorting on every call.
         static $sorted_keys = null;
-
         $mappings = self::get_colour_mappings();
-        $normalized_slug = strtolower(sanitize_title($term_slug));
+        
+        // Sanitize and normalize the input slug to handle variations like spaces or underscores.
+        $normalized_slug = sanitize_title($term_slug);
+        // *** BUG FIX: Ensure underscores are treated as hyphens for matching our array keys. ***
+        $normalized_slug = str_replace('_', '-', $normalized_slug);
 
-        // Priority 1: Check for an exact match in our mapping keys. This is the fastest and most accurate path.
+        // Priority 1: Check for an exact match.
         if (isset($mappings[$normalized_slug])) {
             return $mappings[$normalized_slug];
         }
 
-        // Initialize and cache the sorted keys only once per request.
+        // Initialize and cache the sorted keys once per request.
         if ($sorted_keys === null) {
             $sorted_keys = array_keys($mappings);
-            // Sort keys by length (descending) to match longer, more specific keys first (e.g., 'donkergrijs' before 'grijs').
-            usort($sorted_keys, function($a, $b) {
-                return strlen($b) - strlen($a);
-            });
+            usort($sorted_keys, function($a, $b) { return strlen($b) - strlen($a); });
         }
 
-        // Priority 2: Iterate through the pre-sorted keys to find the first (and best) partial match.
-        // This handles complex slugs like '11000-01-creme' by finding the 'creme' part.
+        // Priority 2: Find the best partial match.
         foreach ($sorted_keys as $key) {
             if (strpos($normalized_slug, $key) !== false) {
                 return $mappings[$key];
             }
         }
 
-        // Log unmapped colors for future improvement. Check your debug.log.
+        // Log unmapped colors for future improvement.
         if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
             error_log('[Free Colour Samples] Unmapped color term slug: ' . $term_slug . ' (normalized: ' . $normalized_slug . ')');
         }
 
-        // Fallback to 'grijs' if no match is found after all checks.
-        return 'grijs';
+        return 'grijs'; // Fallback
     }
 }
