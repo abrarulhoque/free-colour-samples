@@ -487,8 +487,12 @@ function tiwsc_get_sidebar_callback() {
             echo '<div class="sample-prodcuct-img">';
             echo '<div class="sample-prodcuct-img-wrapper">';
             echo '<div class="tiwsc-item-left-content">';
-            echo $image;
-            echo $chip_html;
+            // Only show product image if there's no color chip
+            if (!empty($chip_html)) {
+                echo $chip_html;
+            } else {
+                echo $image;
+            }
             echo '<span class="tiwsc-item-title">' . esc_html($title) . '</span>';
             echo '</div>';
             echo '<a href="#" class="tiwsc-remove-sample" data-product-id="' . esc_attr($product_id) . '" data-sample-key="' . esc_attr($sample_key) . '" style="text-decoration:none;">
