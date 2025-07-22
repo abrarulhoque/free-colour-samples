@@ -240,7 +240,9 @@ jQuery(document).ready(function ($) {
       }
     }
 
-    console.log('[TIWSC] attribute:', attributeName, 'value:', attributeValue)
+    var sampleKeyMain = buildSampleKey(productId, attributeName, attributeValue)
+
+    console.log('[TIWSC] attribute:', attributeName, 'value:', attributeValue, 'sampleKey:', sampleKeyMain)
     console.log('[TIWSC] Selected swatch element:', $form.find('[swatches-attr="attribute_' + attributeName + '"] .cfvsw-selected-swatch'))
 
     if (!attributeValue) {
@@ -275,6 +277,9 @@ jQuery(document).ready(function ($) {
         }
 
         if (response.added) {
+          if (currentSamples.indexOf(sampleKeyMain) === -1) {
+            currentSamples.push(sampleKeyMain)
+          }
           $this.addClass('tiwsc-added')
           $this.find('.tiwsc-button-text').text('Toegevoegd')
           $this
@@ -284,6 +289,9 @@ jQuery(document).ready(function ($) {
           // Auto-open sidebar
           openSidebar()
         } else {
+          currentSamples = currentSamples.filter(function (k) {
+            return k !== sampleKeyMain
+          })
           $this.removeClass('tiwsc-added')
           $this.find('.tiwsc-button-text').text('Gratis Kleurstaal')
           $this
@@ -291,6 +299,9 @@ jQuery(document).ready(function ($) {
             .attr('fill', 'none')
             .attr('stroke', '#333')
         }
+
+        // Re-evaluate button state in case the selected colour is different
+        updateMainVariableSampleButton()
       },
       'json'
     ).fail(function (xhr, status, error) {
@@ -339,6 +350,10 @@ jQuery(document).ready(function ($) {
       function (response) {
         console.log('Remove response:', response)
         if (response.removed) {
+          // Remove from local cache
+          currentSamples = currentSamples.filter(function (k) {
+            return k !== sampleKey
+          })
           // Check if this is a variable product sample
           if (sampleKey && sampleKey.indexOf('|') !== -1) {
             // Parse the sample key for variable products
@@ -413,6 +428,9 @@ jQuery(document).ready(function ($) {
               .attr('fill', 'none')
               .attr('stroke', '#333')
           }
+
+          // After UI adjustments, re-evaluate the main button state
+          updateMainVariableSampleButton()
         }
       },
       'json'
@@ -592,4 +610,134 @@ jQuery(document).ready(function ($) {
       'sidebar open links'
     )
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Track current samples from PHP session so we can disable/enable the
+     main variation button depending on whether the chosen colour sample
+     is already in the cart. */
+  var currentSamples = (typeof tiwsc_ajax !== 'undefined' && Array.isArray(tiwsc_ajax.samples))
+    ? tiwsc_ajax.samples.slice()
+    : []
+
+  function buildSampleKey (productId, attributeName, attributeValue) {
+    if (attributeName && attributeValue) {
+      return productId + '|' + attributeName + '|' + attributeValue
+    }
+    return productId.toString()
+  }
+
+  // Helper to discover the currently selected attribute value (re-uses logic
+  // from the main click handler so we stay compatible with swatch plugins)
+  function getSelectedAttributeValue ($btn, attributeName) {
+    var $form = $btn.closest('form.variations_form')
+    if ($form.length === 0) {
+      $form = $('form.variations_form')
+    }
+
+    var attributeSelector = '[name="attribute_' + attributeName + '"]'
+    var attributeValue = $form.find(attributeSelector).val()
+
+    if (!attributeValue) {
+      // Try CFVSW swatches and other common selectors
+      var possibleSelectors = [
+        '[swatches-attr="attribute_' + attributeName + '"] .cfvsw-selected-swatch',
+        '[swatches-attr="' + attributeName + '"] .cfvsw-selected-swatch',
+        '.cfvsw-swatches-container[swatches-attr="attribute_' + attributeName + '"] .cfvsw-selected-swatch',
+        '.cfvsw-swatches-container[swatches-attr="' + attributeName + '"] .cfvsw-selected-swatch'
+      ]
+
+      for (var i = 0; i < possibleSelectors.length && !attributeValue; i++) {
+        var $selectedSwatch = $form.find(possibleSelectors[i])
+        if ($selectedSwatch.length) {
+          attributeValue =
+            $selectedSwatch.attr('data-slug') ||
+            $selectedSwatch.data('slug') ||
+            $selectedSwatch.attr('data-value')
+        }
+      }
+
+      // Fallback global search
+      if (!attributeValue) {
+        for (var i = 0; i < possibleSelectors.length && !attributeValue; i++) {
+          var $selectedGlobal = $(possibleSelectors[i])
+          if ($selectedGlobal.length) {
+            attributeValue =
+              $selectedGlobal.attr('data-slug') ||
+              $selectedGlobal.data('slug') ||
+              $selectedGlobal.attr('data-value')
+          }
+        }
+      }
+
+      // Radio buttons fallback
+      if (!attributeValue) {
+        attributeValue = $form.find(attributeSelector + ':checked').val()
+      }
+    }
+
+    return attributeValue
+  }
+
+  function updateMainVariableSampleButton () {
+    $('.tiwsc-variable-sample-main-button').each(function () {
+      var $btn = $(this)
+      var productId = $btn.data('product-id')
+      var attributeName = $btn.data('attribute-name')
+      if (!attributeName) return // safety
+
+      var attributeValue = getSelectedAttributeValue($btn, attributeName)
+
+      if (!attributeValue) {
+        // No colour selected yet – ensure button is in default state
+        $btn.removeClass('tiwsc-added')
+        $btn.find('.tiwsc-button-text').text('Gratis Kleurstaal')
+        $btn
+          .find('svg path:first-child')
+          .attr('fill', 'none')
+          .attr('stroke', '#333')
+        $btn.css('pointer-events', '')
+        return
+      }
+
+      var sampleKey = buildSampleKey(productId, attributeName, attributeValue)
+      var isAdded = currentSamples.indexOf(sampleKey) !== -1
+
+      if (isAdded) {
+        $btn.addClass('tiwsc-added')
+        $btn.find('.tiwsc-button-text').text('Toegevoegd')
+        $btn
+          .find('svg path:first-child')
+          .attr('fill', '#88ae98')
+          .attr('stroke', '#88ae98')
+        $btn.css('pointer-events', 'none')
+      } else {
+        $btn.removeClass('tiwsc-added')
+        $btn.find('.tiwsc-button-text').text('Gratis Kleurstaal')
+        $btn
+          .find('svg path:first-child')
+          .attr('fill', 'none')
+          .attr('stroke', '#333')
+        $btn.css('pointer-events', '')
+      }
+    })
+  }
+
+  // Run once on page load
+  updateMainVariableSampleButton()
+
+  /* Re-evaluate when the variation changes */
+  $('form.variations_form').on('found_variation reset_data', function () {
+    updateMainVariableSampleButton()
+  })
+
+  // Select change handler (covers non-swatch attribute dropdowns)
+  $(document).on('change', 'form.variations_form select', function () {
+    updateMainVariableSampleButton()
+  })
+
+  // Swatch click – small delay to allow plugin to mark selection first
+  $(document).on('click', '.cfvsw-swatches-option', function () {
+    setTimeout(updateMainVariableSampleButton, 80)
+  })
+  /* ------------------------------------------------------------------ */
 })

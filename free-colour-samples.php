@@ -716,11 +716,17 @@ add_action('wp_enqueue_scripts', function() {
         'tiwsc-script',
         plugins_url('assets/js/tiwsc-script.js', __FILE__),
         ['jquery'],
-        '1.1.1',
+        '1.1.2',
         true
     );
+    // Pass currently selected samples to the front-end so we can disable
+    // buttons for variations that are already in the cart.
+    tiwsc_safe_session_start();
+    $current_samples = isset($_SESSION['tiwsc_samples']) ? $_SESSION['tiwsc_samples'] : [];
+
     wp_localize_script('tiwsc-script', 'tiwsc_ajax', [
-        'ajax_url' => admin_url('admin-ajax.php')
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'samples'  => $current_samples,
     ]);
 });
 
