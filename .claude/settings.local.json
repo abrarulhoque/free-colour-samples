@@ -11,7 +11,10 @@
       "Bash(sudo mv:*)",
       "Bash(mv:*)",
       "Bash(export PATH=\"$HOME/bin:$PATH\")",
-      "Bash(wp:*)"
+      "Bash(wp:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }

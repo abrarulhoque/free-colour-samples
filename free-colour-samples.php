@@ -710,7 +710,7 @@ add_action('wp_enqueue_scripts', function() {
         'tiwsc-style',
         plugins_url('assets/css/tiwsc-style.css', __FILE__),
         [],
-        '1.1.0'
+        '1.1.1'
     );
     wp_enqueue_script(
         'tiwsc-script',
