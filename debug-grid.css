@@ -1,0 +1,16 @@
+/* Debug CSS - Add this temporarily to see if grid works */
+.tiwsc-samples-catalog-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+    background: #f0f0f0 !important;
+    border: 3px solid red !important;
+    padding: 20px !important;
+}
+
+.tiwsc-sample-item {
+    background: yellow !important;
+    border: 2px solid blue !important;
+    padding: 20px !important;
+    min-height: 200px !important;
+}

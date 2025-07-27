@@ -6,6 +6,17 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Reset any theme interference for our grid */
+.tiwsc-samples-page-container * {
+  box-sizing: border-box;
+}
+
+.tiwsc-samples-page-container .tiwsc-samples-catalog-grid * {
+  list-style: none !important;
+  margin: 0;
+  padding: 0;
+}
+
 .tiwsc-samples-layout {
   display: flex;
   gap: 30px;
@@ -159,25 +170,44 @@
   min-height: 400px;
 }
 
-/* New Catalog-Style Grid */
+/* New Catalog-Style Grid - Override any theme styles */
+.tiwsc-samples-page-container .tiwsc-samples-catalog-grid,
+#tiwsc-samples-grid .tiwsc-samples-catalog-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+  gap: 20px !important;
+  min-height: 400px !important;
+  width: 100% !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Fallback for older browsers or conflicting styles */
 .tiwsc-samples-catalog-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  display: -ms-grid !important;
+  display: grid !important;
+  -ms-grid-columns: (minmax(240px, 1fr))[auto-fill] !important;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+  gap: 20px !important;
+  grid-gap: 20px !important;
   min-height: 400px;
+  width: 100%;
 }
 
 /* Sample Item (replaces product card + color item) */
 .tiwsc-sample-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 24px;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  transition: all 0.3s;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding: 20px !important;
+  background: #fff !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  transition: all 0.3s !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .tiwsc-sample-item:hover {
@@ -229,6 +259,21 @@
 }
 
 /* Sample Button */
+.tiwsc-sample-item .tiwsc-add-sample-btn {
+  width: 100% !important;
+  padding: 12px 20px !important;
+  background: #fff !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
 .tiwsc-add-sample-btn {
   width: 100%;
   padding: 12px 20px;
