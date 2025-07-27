@@ -1,6 +1,7 @@
-/* Samples Page Layout */
+/* Samples Page Layout - Allow full width */
 .tiwsc-samples-page-container {
-  max-width: 1400px;
+  max-width: none !important;
+  width: 100% !important;
   margin: 0 auto;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -21,6 +22,8 @@
   display: flex;
   gap: 30px;
   align-items: flex-start;
+  width: 100% !important;
+  max-width: none !important;
 }
 
 /* Filters Panel */
@@ -130,10 +133,12 @@
   display: none;
 }
 
-/* Grid Container */
+/* Grid Container - Ensure full width */
 .tiwsc-samples-grid-container {
   flex: 1;
-  width: 100%;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
 }
 
 .tiwsc-grid-header {
@@ -178,21 +183,41 @@
   gap: 20px !important;
   min-height: 400px !important;
   width: 100% !important;
+  max-width: none !important;
   list-style: none !important;
   margin: 0 !important;
   padding: 0 !important;
+  box-sizing: border-box !important;
 }
 
-/* Fallback for older browsers or conflicting styles */
+/* Override any parent container width constraints */
+.tiwsc-samples-grid-container,
+#tiwsc-samples-grid {
+  width: 100% !important;
+  max-width: none !important;
+  overflow: visible !important;
+}
+
+/* Force full width on all parent containers that might constrain width */
+.tiwsc-samples-page-container,
+.tiwsc-samples-layout,
+.tiwsc-samples-grid-container,
+#tiwsc-samples-grid {
+  max-width: none !important;
+}
+
+/* Consolidated grid styles with width override */
 .tiwsc-samples-catalog-grid {
-  display: -ms-grid !important;
   display: grid !important;
-  -ms-grid-columns: (minmax(240px, 1fr))[auto-fill] !important;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
   gap: 20px !important;
   grid-gap: 20px !important;
-  min-height: 400px;
-  width: 100%;
+  min-height: 400px !important;
+  width: calc(100vw - 280px) !important; /* Account for sidebar + padding */
+  max-width: 1200px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
 }
 
 /* Sample Item (replaces product card + color item) */
