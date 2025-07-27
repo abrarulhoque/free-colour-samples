@@ -159,7 +159,104 @@
   min-height: 400px;
 }
 
-/* Product Card */
+/* New Catalog-Style Grid */
+.tiwsc-samples-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  min-height: 400px;
+}
+
+/* Sample Item (replaces product card + color item) */
+.tiwsc-sample-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.tiwsc-sample-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #ddd;
+}
+
+/* Large Sample Swatch */
+.tiwsc-sample-swatch {
+  margin-bottom: 16px;
+}
+
+.tiwsc-sample-swatch .tiwsc-color-chip {
+  display: block;
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Sample Info */
+.tiwsc-sample-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+  min-height: 60px;
+  justify-content: center;
+}
+
+.tiwsc-sample-color-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tiwsc-sample-product-name {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* Sample Button */
+.tiwsc-add-sample-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: #fff;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tiwsc-add-sample-btn:hover:not(.tiwsc-added) {
+  background: #000;
+  color: #fff;
+}
+
+.tiwsc-add-sample-btn.tiwsc-added {
+  background: #88ae98;
+  color: #fff;
+  border-color: #88ae98;
+  cursor: default;
+}
+
+/* Legacy styles for backward compatibility */
 .tiwsc-product-card {
   background: #fff;
   border: 1px solid #e0e0e0;
@@ -172,7 +269,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Product Header */
 .tiwsc-product-header {
   display: flex;
   align-items: center;
@@ -223,7 +319,6 @@
   font-weight: 600;
 }
 
-/* Color Grid */
 .tiwsc-color-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -248,7 +343,7 @@
   background: #f5f5f5;
 }
 
-.tiwsc-color-chip {
+.tiwsc-color-item .tiwsc-color-chip {
   display: block;
   width: 60px;
   height: 60px;
@@ -267,33 +362,6 @@
   margin-bottom: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.tiwsc-add-sample-btn {
-  width: 100%;
-  padding: 8px 16px;
-  background: #fff;
-  color: #000;
-  border: 2px solid #000;
-  border-radius: 0;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.tiwsc-add-sample-btn:hover:not(.tiwsc-added) {
-  background: #000;
-  color: #fff;
-}
-
-.tiwsc-add-sample-btn.tiwsc-added {
-  background: #88ae98;
-  color: #fff;
-  border-color: #88ae98;
-  cursor: default;
 }
 
 /* Loading State */
@@ -355,6 +423,30 @@
     margin-bottom: 20px;
   }
 
+  /* New catalog grid responsive */
+  .tiwsc-samples-catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .tiwsc-sample-item {
+    padding: 16px;
+  }
+
+  .tiwsc-sample-swatch .tiwsc-color-chip {
+    width: 100px;
+    height: 100px;
+  }
+
+  .tiwsc-sample-color-name {
+    font-size: 14px;
+  }
+
+  .tiwsc-sample-product-name {
+    font-size: 12px;
+  }
+
+  /* Legacy styles */
   .tiwsc-product-header {
     flex-direction: column;
     text-align: center;
@@ -374,7 +466,7 @@
     padding: 12px;
   }
 
-  .tiwsc-color-chip {
+  .tiwsc-color-item .tiwsc-color-chip {
     width: 50px;
     height: 50px;
   }
@@ -454,6 +546,35 @@
 }
 
 @media (max-width: 480px) {
+  /* New catalog grid mobile */
+  .tiwsc-samples-catalog-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .tiwsc-sample-item {
+    padding: 12px;
+  }
+
+  .tiwsc-sample-swatch .tiwsc-color-chip {
+    width: 80px;
+    height: 80px;
+  }
+
+  .tiwsc-sample-color-name {
+    font-size: 12px;
+  }
+
+  .tiwsc-sample-product-name {
+    font-size: 11px;
+  }
+
+  .tiwsc-add-sample-btn {
+    font-size: 11px;
+    padding: 8px 12px;
+  }
+
+  /* Legacy styles */
   .tiwsc-color-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
@@ -464,7 +585,7 @@
     padding: 12px;
   }
 
-  .tiwsc-color-chip {
+  .tiwsc-color-item .tiwsc-color-chip {
     width: 50px;
     height: 50px;
     margin-bottom: 8px;
@@ -473,10 +594,5 @@
   .tiwsc-color-name {
     font-size: 12px;
     margin-bottom: 8px;
-  }
-
-  .tiwsc-add-sample-btn {
-    font-size: 11px;
-    padding: 6px 12px;
   }
 }

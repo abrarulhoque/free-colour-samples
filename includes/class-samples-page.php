@@ -245,44 +245,37 @@ class TIWSC_Samples_Page {
             </div>
             <?php
         } else {
-            foreach ($product_groups as $group) {
+            ?>
+            <div class="tiwsc-samples-catalog-grid">
+                <?php 
+                foreach ($product_groups as $group) {
+                    foreach ($group['colors'] as $color):
+                        $is_added = in_array($color['sample_key'], $session_samples, true);
                 ?>
-                <div class="tiwsc-product-card">
-                    <div class="tiwsc-product-header">
-                        <?php if ($group['product_image']): ?>
-                            <img src="<?php echo esc_url($group['product_image']); ?>" alt="<?php echo esc_attr($group['product_title']); ?>" class="tiwsc-product-image">
-                        <?php endif; ?>
-                        <div class="tiwsc-product-info">
-                            <h3 class="tiwsc-product-title">
-                                <a href="<?php echo esc_url($group['product_url']); ?>" target="_blank">
-                                    <?php echo esc_html($group['product_title']); ?>
-                                </a>
-                            </h3>
-                            <div class="tiwsc-product-price"><?php echo $group['price_html']; ?></div>
-                        </div>
-                    </div>
-                    <div class="tiwsc-color-grid">
-                        <?php foreach ($group['colors'] as $color):
-                            $is_added = in_array($color['sample_key'], $session_samples, true);
-                        ?>
-                            <div class="tiwsc-color-item" data-master-color="<?php echo esc_attr($color['master_color']); ?>">
+                        <div class="tiwsc-sample-item" data-master-color="<?php echo esc_attr($color['master_color']); ?>">
+                            <div class="tiwsc-sample-swatch">
                                 <?php echo $color['chip_html']; ?>
-                                <span class="tiwsc-color-name"><?php echo esc_html($color['color_name']); ?></span>
-                                <button type="button"
-                                        class="tiwsc-add-sample-btn <?php echo $is_added ? 'tiwsc-added' : ''; ?>"
-                                        data-product-id="<?php echo esc_attr($group['product_id']); ?>"
-                                        data-attribute-name="<?php echo esc_attr($group['attribute']); ?>"
-                                        data-attribute-value="<?php echo esc_attr($color['color_slug']); ?>"
-                                        data-color-name="<?php echo esc_attr($color['color_name']); ?>"
-                                        title="<?php echo $is_added ? __('Toegevoegd aan kleurstalen', 'free-colour-samples') : __('Toevoegen aan kleurstalen', 'free-colour-samples'); ?>">
-                                    <?php echo $is_added ? __('TOEGEVOEGD', 'free-colour-samples') : __('+ TOEVOEGEN', 'free-colour-samples'); ?>
-                                </button>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-                <?php
-            }
+                            <div class="tiwsc-sample-info">
+                                <span class="tiwsc-sample-color-name"><?php echo esc_html($color['color_name']); ?></span>
+                                <span class="tiwsc-sample-product-name"><?php echo esc_html($group['product_title']); ?></span>
+                            </div>
+                            <button type="button"
+                                    class="tiwsc-add-sample-btn <?php echo $is_added ? 'tiwsc-added' : ''; ?>"
+                                    data-product-id="<?php echo esc_attr($group['product_id']); ?>"
+                                    data-attribute-name="<?php echo esc_attr($group['attribute']); ?>"
+                                    data-attribute-value="<?php echo esc_attr($color['color_slug']); ?>"
+                                    data-color-name="<?php echo esc_attr($color['color_name']); ?>"
+                                    title="<?php echo $is_added ? __('Toegevoegd aan kleurstalen', 'free-colour-samples') : __('Toevoegen aan kleurstalen', 'free-colour-samples'); ?>">
+                                <?php echo $is_added ? __('TOEGEVOEGD', 'free-colour-samples') : __('+ TOEVOEGEN', 'free-colour-samples'); ?>
+                            </button>
+                        </div>
+                <?php 
+                    endforeach;
+                }
+                ?>
+            </div>
+            <?php
         }
 
         $html = ob_get_clean();

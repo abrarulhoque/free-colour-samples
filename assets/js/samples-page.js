@@ -155,8 +155,8 @@ jQuery(document).ready(function ($) {
         // Update count
         $('.tiwsc-count-number').text(response.count)
 
-        // Animate product cards
-        $('.tiwsc-product-card').each(function (index) {
+        // Animate sample items (supports both old and new layouts)
+        $('.tiwsc-product-card, .tiwsc-sample-item').each(function (index) {
           $(this)
             .css({
               opacity: 0,
