@@ -312,18 +312,21 @@ class TIWSC_Samples_Page {
             return;
         }
         
+        $css_path = plugin_dir_path(__FILE__) . '../assets/css/samples-page.css';
+        $js_path = plugin_dir_path(__FILE__) . '../assets/js/samples-page.js';
+        
         wp_enqueue_style(
             'tiwsc-samples-page',
             plugins_url('../assets/css/samples-page.css', __FILE__),
             array(),
-            '1.0.0'
+            filemtime($css_path)
         );
         
         wp_enqueue_script(
             'tiwsc-samples-page',
             plugins_url('../assets/js/samples-page.js', __FILE__),
             array('jquery'),
-            '1.0.0',
+            filemtime($js_path),
             true
         );
         
