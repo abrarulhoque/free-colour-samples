@@ -794,7 +794,17 @@ add_action('wp_footer', function() {
     <div id="tiwsc-sidebar">
         <div class="tiwsc-sidebar-header" style="position:sticky;top:0;z-index:100000;">
             <button class="sidebar-close-btn tiwsc-close-trigger" id="tiwsc-sidebar-header-close">×</button>
-            <img width="auto" height="auto" src="https://rolenhor.nl/wp-content/uploads/2025/04/Rol-hor-logo-wit.png.webp" alt="" />
+            <?php
+            // Check if site has custom logo
+            $custom_logo_id = get_theme_mod('custom_logo');
+            if ($custom_logo_id) {
+                $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
+                echo '<img width="auto" height="auto" src="' . esc_url($logo_url) . '" alt="' . esc_attr(get_bloginfo('name')) . '" style="max-height: 60px; width: auto;" />';
+            } else {
+                // Fallback to text-based site title
+                echo '<h2 style="color: white; margin: 0; font-size: 24px; font-weight: bold;">' . esc_html(get_bloginfo('name')) . '</h2>';
+            }
+            ?>
         </div>
         <div id="tiwsc-sidebar-content"></div>
     </div>
