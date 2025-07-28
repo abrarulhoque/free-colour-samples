@@ -726,4 +726,30 @@
   .tiwsc-sample-swatch .tiwsc-color-chip { height:120px; }
 }
 
+/* mobile: force 2 columns and full width (override earlier rules) */
+@media (max-width: 768px) {
+  .tiwsc-samples-page-container .tiwsc-samples-catalog-grid,
+  #tiwsc-samples-grid .tiwsc-samples-catalog-grid,
+  .tiwsc-samples-catalog-grid {
+    width: 100% !important;                 /* kill calc(100vw - 280px) */
+    max-width: none !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important; /* no min 180px */
+    gap: 8px !important;
+  }
 
+  .tiwsc-sample-item { padding: 8px !important; }
+  .tiwsc-sample-swatch .tiwsc-color-chip {
+    aspect-ratio: 4 / 3;                     /* consistent rectangle */
+    min-height: 120px;                        /* fallback */
+    height: auto !important;
+  }
+}
+
+/* keep 2 cols even on very small phones */
+@media (max-width: 480px) {
+  .tiwsc-samples-page-container .tiwsc-samples-catalog-grid,
+  #tiwsc-samples-grid .tiwsc-samples-catalog-grid,
+  .tiwsc-samples-catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
