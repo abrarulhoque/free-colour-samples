@@ -179,8 +179,8 @@
 .tiwsc-samples-page-container .tiwsc-samples-catalog-grid,
 #tiwsc-samples-grid .tiwsc-samples-catalog-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
-  gap: 20px !important;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  gap: 10px !important;
   min-height: 400px !important;
   width: 100% !important;
   max-width: none !important;
@@ -209,9 +209,9 @@
 /* Consolidated grid styles with width override */
 .tiwsc-samples-catalog-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
-  gap: 20px !important;
-  grid-gap: 20px !important;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  gap: 10px !important;
+  grid-gap: 10px !important;
   min-height: 400px !important;
   width: calc(100vw - 280px) !important; /* Account for sidebar + padding */
   max-width: 1200px !important;
@@ -226,35 +226,36 @@
   flex-direction: column !important;
   align-items: center !important;
   text-align: center !important;
-  padding: 20px !important;
+  padding: 10px !important;
   background: #fff !important;
   border: 1px solid #e0e0e0 !important;
-  border-radius: 8px !important;
+  border-radius: 0 !important;
   transition: all 0.3s !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
 
 .tiwsc-sample-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-color: #ccc;
 }
 
 /* Large Sample Swatch */
 .tiwsc-sample-swatch {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+  width: 100%;
 }
 
 .tiwsc-sample-swatch .tiwsc-color-chip {
   display: block;
-  width: 120px;
-  height: 120px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  width: 100%;
+  height: 140px;
+  border-radius: 0;
+  border: 0;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }
 
 /* Sample Info */
@@ -262,61 +263,61 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
-  min-height: 60px;
+  margin-bottom: 8px;
+  min-height: 40px;
   justify-content: center;
 }
 
 .tiwsc-sample-color-name {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   color: #000;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .tiwsc-sample-product-name {
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
-  line-height: 1.4;
+  line-height: 1.2;
   text-align: center;
 }
 
 /* Sample Button */
 .tiwsc-sample-item .tiwsc-add-sample-btn {
   width: 100% !important;
-  padding: 12px 20px !important;
-  background: #fff !important;
-  color: #000 !important;
-  border: 2px solid #000 !important;
+  padding: 8px 10px !important;
+  background: #000 !important;
+  color: #fff !important;
+  border: 1px solid #000 !important;
   border-radius: 0 !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
   cursor: pointer !important;
   transition: all 0.2s !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
+  letter-spacing: 0.3px !important;
 }
 
 .tiwsc-add-sample-btn {
   width: 100%;
-  padding: 12px 20px;
-  background: #fff;
-  color: #000;
-  border: 2px solid #000;
+  padding: 8px 10px;
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
   border-radius: 0;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .tiwsc-add-sample-btn:hover:not(.tiwsc-added) {
-  background: #000;
-  color: #fff;
+  background: #333;
+  border-color: #333;
 }
 
 .tiwsc-add-sample-btn.tiwsc-added {
@@ -496,24 +497,24 @@
   /* New catalog grid responsive */
   .tiwsc-samples-catalog-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 8px;
   }
 
   .tiwsc-sample-item {
-    padding: 16px;
+    padding: 8px;
   }
 
   .tiwsc-sample-swatch .tiwsc-color-chip {
-    width: 100px;
+    width: 100%;
     height: 100px;
   }
 
   .tiwsc-sample-color-name {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .tiwsc-sample-product-name {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   /* Legacy styles */
@@ -619,29 +620,29 @@
   /* New catalog grid mobile */
   .tiwsc-samples-catalog-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 8px;
   }
 
   .tiwsc-sample-item {
-    padding: 12px;
+    padding: 8px;
   }
 
   .tiwsc-sample-swatch .tiwsc-color-chip {
-    width: 80px;
+    width: 100%;
     height: 80px;
   }
 
   .tiwsc-sample-color-name {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .tiwsc-sample-product-name {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .tiwsc-add-sample-btn {
-    font-size: 11px;
-    padding: 8px 12px;
+    font-size: 10px;
+    padding: 6px 8px;
   }
 
   /* Legacy styles */
