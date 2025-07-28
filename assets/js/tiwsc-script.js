@@ -55,6 +55,14 @@ jQuery(document).ready(function ($) {
     renderState($form, isAdded);
   }
 
+  function rememberSelection(pidOrForm, key, added) {
+    const pid = (pidOrForm && pidOrForm.jquery) ? getFormPid(pidOrForm) : pidOrForm;
+    if (!pid || !key) return;
+    if (!addedMap.has(pid)) addedMap.set(pid, new Set());
+    const set = addedMap.get(pid);
+    added ? set.add(key) : set.delete(key);
+  }
+
   console.groupCollapsed('[TIWSC] Initial DOM scan')
   console.log('Free sample links found:', $('.tiwsc-free-sample-link').length)
   console.log(
@@ -69,20 +77,24 @@ jQuery(document).ready(function ($) {
 
   $('form.variations_form').on('found_variation', function (event, variation) {
     console.log('[TIWSC] found_variation event fired:', variation)
+    updateForForm($(this)); // Update button state when variation is found
   })
 
   $('form.variations_form').on('reset_data', function () {
     console.log('[TIWSC] reset_data event fired')
+    renderState($(this), false); // Clear button state when reset
   })
   
   // Listen for clicks on variation swatches to ensure compatibility
   $(document).on('click', '.cfvsw-swatches-option', function() {
     console.log('[TIWSC] Swatch clicked:', $(this).attr('data-slug'))
+    const $form = $(this).closest('form.variations_form')
     // Small delay to ensure the swatch plugin has updated the select
     setTimeout(function() {
       // Trigger change on the select to ensure WooCommerce updates
-      var $form = $('form.variations_form')
       $form.find('select').trigger('change')
+      // Update button state after swatch selection
+      updateForForm($form)
     }, 50)
   })
 
@@ -203,6 +215,13 @@ jQuery(document).ready(function ($) {
           // Update SVG to filled version
           $this.find('svg path:first-child').attr('fill', '#88ae98')
 
+          // Remember this selection was added
+          const key = 'attribute_' + attributeName + '=' + attributeValue
+          rememberSelection(productId, key, true)
+          
+          // Update form state
+          updateForForm($this.closest('form.variations_form'))
+
           // Auto-open sidebar when sample is added
           openSidebar()
         } else {
@@ -213,6 +232,13 @@ jQuery(document).ready(function ($) {
             .find('svg path:first-child')
             .attr('fill', 'none')
             .attr('stroke', '#333')
+            
+          // Remember this selection was removed
+          const key = 'attribute_' + attributeName + '=' + attributeValue
+          rememberSelection(productId, key, false)
+          
+          // Update form state
+          updateForForm($this.closest('form.variations_form'))
         }
       },
       'json'
@@ -325,13 +351,9 @@ jQuery(document).ready(function ($) {
         }
 
         if (response.added) {
-          // Track which variation was added
-          const pid = productId;
-          const key = attributeName + '=' + attributeValue;
-          if (pid && key) {
-            if (!addedMap.has(pid)) addedMap.set(pid, new Set());
-            addedMap.get(pid).add(key);
-          }
+          // Track which variation was added using the proper key format
+          const $form = $this.closest('form.variations_form')
+          rememberSelection($form, getAttrKey($form), true)
           
           $this.addClass('tiwsc-added')
           $this.find('.tiwsc-button-text').text('Toegevoegd')
@@ -339,15 +361,26 @@ jQuery(document).ready(function ($) {
             .find('svg path:first-child')
             .attr('fill', '#88ae98')
             .attr('stroke', '#88ae98')
+            
+          // Update form state
+          updateForForm($form)
+            
           // Auto-open sidebar
           openSidebar()
         } else {
+          // Track removal
+          const $form = $this.closest('form.variations_form')
+          rememberSelection($form, getAttrKey($form), false)
+          
           $this.removeClass('tiwsc-added')
           $this.find('.tiwsc-button-text').text('Gratis Kleurstaal')
           $this
             .find('svg path:first-child')
             .attr('fill', 'none')
             .attr('stroke', '#333')
+            
+          // Update form state
+          updateForForm($form)
         }
       },
       'json'
@@ -654,17 +687,17 @@ jQuery(document).ready(function ($) {
   // Event listeners for variation tracking
   
   // Whenever the variation changes, re-evaluate state
-  $('.variations_form')
-    .on('change', '.variations select', function () {
-      updateForForm($(this).closest('.variations_form'));
+  $('form.variations_form')
+    .on('change', '.variations select[name^="attribute_"]', function () {
+      updateForForm($(this).closest('form.variations_form'));
     })
-    .on('woocommerce_variation_has_changed found_variation reset_data', function () {
+    .on('woocommerce_variation_has_changed', function () {
       updateForForm($(this));
     });
 
   // Cover popular swatch plugins (you have both tp-woo-swatches and cfvsw markup)
   $(document).on('click', '.cfvsw-swatches-option, .tp-woo-swatches .tp-swatches', function () {
-    const $form = $(this).closest('.variations_form');
+    const $form = $(this).closest('form.variations_form');
     setTimeout(function () {
       updateForForm($form);
     }, 50);
@@ -672,6 +705,6 @@ jQuery(document).ready(function ($) {
 
   // Reset link should clear the visual state
   $(document).on('click', '.reset_variations', function () {
-    renderState($(this).closest('.variations_form'), false);
+    renderState($(this).closest('form.variations_form'), false);
   });
 })
