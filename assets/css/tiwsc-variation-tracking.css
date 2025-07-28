@@ -1,0 +1,17 @@
+/* Keep sample buttons green even after added */
+.tiwsc-variable-sample-main-button.tiwsc-added,
+.tiwsc-free-sample-link.tiwsc-added,
+.tiwsc-add-sample-btn.tiwsc-added {
+  background: #88AE98 !important;
+  border-color: #88AE98 !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Make the icon readable on green */
+.tiwsc-variable-sample-main-button.tiwsc-added svg path,
+.tiwsc-free-sample-link.tiwsc-added svg path,
+.tiwsc-add-sample-btn.tiwsc-added svg path {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}

@@ -767,6 +767,12 @@ add_action('wp_enqueue_scripts', function() {
         [],
         '1.1.1'
     );
+    wp_enqueue_style(
+        'tiwsc-variation-tracking',
+        plugins_url('assets/css/tiwsc-variation-tracking.css', __FILE__),
+        ['tiwsc-style'],
+        '1.0.0'
+    );
     wp_enqueue_script(
         'tiwsc-script',
         plugins_url('assets/js/tiwsc-script.js', __FILE__),

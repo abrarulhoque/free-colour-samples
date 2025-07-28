@@ -5,6 +5,56 @@ jQuery(document).ready(function ($) {
     typeof tiwsc_ajax !== 'undefined' ? tiwsc_ajax : 'undefined'
   )
 
+  // Track which variations were added
+  const ADDED_LABEL = 'Toegevoegd'; // change if your site uses a different text
+  const addedMap = new Map(); // productId -> Set of "attribute=value&attribute2=value2"
+
+  function getFormPid($form) {
+    return (
+      $form.find('input[name="product_id"]').val() ||
+      $form.find('input[name="add-to-cart"]').val() ||
+      $form.data('product_id') ||
+      null
+    );
+  }
+
+  function getAttrKey($form) {
+    const parts = [];
+    $form.find('.variations select[name^="attribute_"]').each(function () {
+      const v = $(this).val();
+      const n = $(this).attr('name');
+      if (v) parts.push(n + '=' + v);
+    });
+    return parts.join('&'); // unique enough per selection
+  }
+
+  function cacheDefaultLabel($btn) {
+    if (!$btn.data('label-default')) {
+      $btn.data('label-default', $.trim($btn.text()));
+    }
+  }
+
+  function renderState($form, isAdded) {
+    const $btn = $form.find(
+      '.tiwsc-variable-sample-main-button, .tiwsc-free-sample-link, .tiwsc-add-sample-btn'
+    );
+    if (!$btn.length) return;
+    cacheDefaultLabel($btn);
+    if (isAdded) {
+      $btn.addClass('tiwsc-added').text(ADDED_LABEL);
+    } else {
+      $btn.removeClass('tiwsc-added').text($btn.data('label-default'));
+    }
+  }
+
+  function updateForForm($form) {
+    const pid = getFormPid($form);
+    const key = getAttrKey($form);
+    const set = pid && addedMap.get(pid);
+    const isAdded = !!(set && key && set.has(key));
+    renderState($form, isAdded);
+  }
+
   console.groupCollapsed('[TIWSC] Initial DOM scan')
   console.log('Free sample links found:', $('.tiwsc-free-sample-link').length)
   console.log(
@@ -275,6 +325,14 @@ jQuery(document).ready(function ($) {
         }
 
         if (response.added) {
+          // Track which variation was added
+          const pid = productId;
+          const key = attributeName + '=' + attributeValue;
+          if (pid && key) {
+            if (!addedMap.has(pid)) addedMap.set(pid, new Set());
+            addedMap.get(pid).add(key);
+          }
+          
           $this.addClass('tiwsc-added')
           $this.find('.tiwsc-button-text').text('Toegevoegd')
           $this
@@ -592,4 +650,28 @@ jQuery(document).ready(function ($) {
       'sidebar open links'
     )
   }
+
+  // Event listeners for variation tracking
+  
+  // Whenever the variation changes, re-evaluate state
+  $('.variations_form')
+    .on('change', '.variations select', function () {
+      updateForForm($(this).closest('.variations_form'));
+    })
+    .on('woocommerce_variation_has_changed found_variation reset_data', function () {
+      updateForForm($(this));
+    });
+
+  // Cover popular swatch plugins (you have both tp-woo-swatches and cfvsw markup)
+  $(document).on('click', '.cfvsw-swatches-option, .tp-woo-swatches .tp-swatches', function () {
+    const $form = $(this).closest('.variations_form');
+    setTimeout(function () {
+      updateForForm($form);
+    }, 50);
+  });
+
+  // Reset link should clear the visual state
+  $(document).on('click', '.reset_variations', function () {
+    renderState($(this).closest('.variations_form'), false);
+  });
 })
