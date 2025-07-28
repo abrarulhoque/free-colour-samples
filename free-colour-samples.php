@@ -23,6 +23,66 @@ add_action('init', function() {
     new TIWSC_Samples_Page();
 });
 
+// Cookie persistence config
+const TIWSC_COOKIE = 'tiwsc_samples_v1';
+const TIWSC_COOKIE_TTL = 30 * DAY_IN_SECONDS;
+
+// Sign/verify a tiny json payload so users can't tamper with it
+function tiwsc_sign_payload($payload_json) {
+    return hash_hmac('sha256', $payload_json, wp_salt('auth'));
+}
+
+function tiwsc_cookie_pack(array $samples) {
+    $payload = wp_json_encode(array_values($samples));
+    return base64_encode($payload) . '|' . tiwsc_sign_payload($payload);
+}
+
+function tiwsc_cookie_unpack($cookie_val) {
+    if (empty($cookie_val) || strpos($cookie_val, '|') === false) return [];
+    list($b64, $sig) = explode('|', $cookie_val, 2);
+    $payload = base64_decode($b64, true);
+    if (!$payload) return [];
+    if (!hash_equals(tiwsc_sign_payload($payload), $sig)) return []; // tampered
+    $arr = json_decode($payload, true);
+    return is_array($arr) ? $arr : [];
+}
+
+function tiwsc_validate_sample_key($k) {
+    // accept "123" or "123|pa_kleur|red"
+    $pid = strpos($k, '|') !== false ? explode('|', $k)[0] : $k;
+    return is_numeric($pid) && get_post_status((int)$pid);
+}
+
+function tiwsc_sanitize_samples(array $samples) {
+    $samples = array_values(array_filter($samples, 'tiwsc_validate_sample_key'));
+    $samples = array_values(array_unique($samples));
+    return array_slice($samples, 0, 5); // enforce max 5
+}
+
+function tiwsc_persist_samples(array $samples) {
+    $samples = tiwsc_sanitize_samples($samples);
+    $_SESSION['tiwsc_samples'] = $samples;
+
+    // 30-day, secure cookie
+    setcookie(
+        TIWSC_COOKIE,
+        tiwsc_cookie_pack($samples),
+        [
+            'expires'  => time() + TIWSC_COOKIE_TTL,
+            'path'     => COOKIEPATH ?: '/',
+            'domain'   => COOKIE_DOMAIN,
+            'secure'   => is_ssl(),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]
+    );
+
+    // sync for logged-in users so it follows them across devices
+    if (is_user_logged_in()) {
+        update_user_meta(get_current_user_id(), 'tiwsc_samples', $samples);
+    }
+}
+
 // Load text domain for translations
 add_action('plugins_loaded', 'tiwsc_load_textdomain');
 function tiwsc_load_textdomain() {
@@ -41,31 +101,22 @@ function tiwsc_is_enabled() {
 }
 
 add_action('init', function() {
-    // Start session if not already started and headers not sent
-    if (!session_id() && !headers_sent()) {
-        session_start();
-    }
-    
-    // Initialize samples array if not set
-    if (!isset($_SESSION['tiwsc_samples'])) {
-        $_SESSION['tiwsc_samples'] = [];
-    }
-    
-    // Clean up invalid product IDs from session
-    if (isset($_SESSION['tiwsc_samples']) && is_array($_SESSION['tiwsc_samples'])) {
-        $_SESSION['tiwsc_samples'] = array_filter($_SESSION['tiwsc_samples'], function($sample_key) {
-            // Handle both simple (numeric ID) and variable (product|attribute|value) keys
-            $product_id = $sample_key;
-            if (strpos($sample_key, '|') !== false) {
-                $parts = explode('|', $sample_key);
-                $product_id = $parts[0]; // First part is always the product ID
-            }
+    tiwsc_safe_session_start();
 
-            return is_numeric($product_id) && get_post_status($product_id) !== false;
-        });
-        $_SESSION['tiwsc_samples'] = array_values($_SESSION['tiwsc_samples']); // Re-index array
+    // if session is empty, try cookie/usermeta
+    $current = isset($_SESSION['tiwsc_samples']) ? (array) $_SESSION['tiwsc_samples'] : [];
+    if (empty($current)) {
+        $from_cookie = isset($_COOKIE[TIWSC_COOKIE]) ? tiwsc_cookie_unpack($_COOKIE[TIWSC_COOKIE]) : [];
+        $merged = $from_cookie;
+
+        if (is_user_logged_in()) {
+            $from_meta = (array) get_user_meta(get_current_user_id(), 'tiwsc_samples', true);
+            $merged = array_merge($merged, $from_meta);
+        }
+
+        tiwsc_persist_samples($merged); // sanitize + write back session & cookie
     }
-}, 1); // High priority to run early
+}, 2);
 
 add_action('admin_menu', function() {
     add_menu_page(
@@ -386,6 +437,7 @@ function tiwsc_toggle_sample_callback() {
     if (in_array($sample_key, $samples)) {
         // Remove sample
         $_SESSION['tiwsc_samples'] = array_values(array_diff($samples, [$sample_key]));
+        tiwsc_persist_samples($_SESSION['tiwsc_samples']);
         wp_send_json(['added' => false, 'limit' => false]);
     } else {
         // Add sample
@@ -395,6 +447,7 @@ function tiwsc_toggle_sample_callback() {
         $_SESSION['tiwsc_samples'][] = $sample_key;
         $_SESSION['tiwsc_samples'] = array_unique($_SESSION['tiwsc_samples']); // Remove duplicates
         $_SESSION['tiwsc_samples'] = array_values($_SESSION['tiwsc_samples']); // Re-index
+        tiwsc_persist_samples($_SESSION['tiwsc_samples']);
         wp_send_json(['added' => true, 'limit' => false]);
     }
 }
@@ -408,10 +461,11 @@ function tiwsc_remove_sample_callback() {
     $sample_key = isset($_POST['sample_key']) ? sanitize_text_field($_POST['sample_key']) : $product_id;
     
     // Ensure session is started
-    if (!session_id()) session_start();
+    tiwsc_safe_session_start();
     
     if (isset($_SESSION['tiwsc_samples'])) {
         $_SESSION['tiwsc_samples'] = array_values(array_diff($_SESSION['tiwsc_samples'], [$sample_key]));
+        tiwsc_persist_samples($_SESSION['tiwsc_samples']);
     }
     wp_send_json(['removed' => true]);
 }
@@ -698,6 +752,7 @@ function tiwsc_submit_sample_form_callback() {
     wp_mail($email, $user_subject, $user_message);
 
     $_SESSION['tiwsc_samples'] = [];
+    tiwsc_persist_samples([]); // Clear cookie and user meta
     echo __('Bedankt voor je aanvraag! We sturen de kleurstalen zo spoedig mogelijk op. Een bevestigingsmail is naar je verstuurd.', 'free-colour-samples');
     wp_die();
 }
