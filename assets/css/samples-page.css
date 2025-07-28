@@ -753,3 +753,26 @@
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
+
+/* desktop: two independent scrolls */
+@media (min-width: 1025px) {
+  .tiwsc-samples-layout {
+    /* already display:flex; we just size it to the viewport */
+    height: var(--tiwsc-two-pane-h, 70vh);
+    min-height: 0;                 /* critical so children can scroll */
+    overflow: hidden;              /* keep scroll inside the columns */
+  }
+
+  .tiwsc-filters-panel,
+  .tiwsc-samples-grid-container {
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;  /* stop wheel from bubbling to body */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+  }
+}
+
+/* optional: keep the grid header visible while the list scrolls */
+.tiwsc-grid-header { position: sticky; top: 0; background:#fff; z-index: 1; }

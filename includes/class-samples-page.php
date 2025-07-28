@@ -114,6 +114,19 @@ class TIWSC_Samples_Page {
                 </div>
             </div>
         </div>
+        <script>
+        (function () {
+          function setTwoPaneHeight() {
+            var wrap = document.querySelector('.tiwsc-samples-layout');
+            if (!wrap) return;
+            var available = window.innerHeight - wrap.getBoundingClientRect().top;
+            wrap.style.setProperty('--tiwsc-two-pane-h', available + 'px');
+          }
+          window.addEventListener('load', setTwoPaneHeight);
+          window.addEventListener('resize', setTwoPaneHeight);
+          window.addEventListener('orientationchange', setTwoPaneHeight);
+        })();
+        </script>
         <?php
         return ob_get_clean();
     }
