@@ -788,3 +788,28 @@
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* desktop: keep two independent scrolls but hide the scrollbars */
+@media (min-width: 1025px) {
+  /* kill the page/body scrollbar on this screen */
+  .tiwsc-samples-page-container,
+  .tiwsc-samples-layout {
+    overflow: hidden !important;
+  }
+
+  /* both columns still scroll, just no visible rails */
+  .tiwsc-filters-panel,
+  .tiwsc-samples-grid-container,
+  #tiwsc-samples-grid {
+    overflow: auto !important;
+    -ms-overflow-style: none;   /* ie/old edge */
+    scrollbar-width: none;      /* firefox */
+    scrollbar-gutter: stable;   /* avoid layout shift if we later show bars */
+  }
+  .tiwsc-filters-panel::-webkit-scrollbar,
+  .tiwsc-samples-grid-container::-webkit-scrollbar,
+  #tiwsc-samples-grid::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
