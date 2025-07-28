@@ -667,3 +667,63 @@
     margin-bottom: 8px;
   }
 }
+
+
+/* additional css */
+/* ===== grid: tight, masonry-like columns with minimal gaps ===== */
+.tiwsc-samples-page-container .tiwsc-samples-catalog-grid,
+#tiwsc-samples-grid .tiwsc-samples-catalog-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important; /* wider tiles */
+  gap: 12px !important;            /* minimal gaps like theirs */
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+  box-sizing: border-box !important;
+}
+
+/* ===== tile/card: flat rectangle, no extra padding or rounded corners ===== */
+.tiwsc-sample-item {
+  display: flex !important;
+  flex-direction: column !important;
+  background: #fff !important;
+  border: 1px solid #e6e6e6 !important;
+  border-radius: 0 !important;
+  padding: 12px !important;        /* remove the “big padding” look */
+  transition: box-shadow .2s, border-color .2s !important;
+}
+.tiwsc-sample-item:hover { box-shadow: 0 2px 4px rgba(0,0,0,.06); border-color:#ccc; }
+
+/* ===== image/swatch: fill the card, fixed height for a proper rectangle ===== */
+.tiwsc-sample-swatch { width:100%; margin:0 0 10px; }
+.tiwsc-sample-swatch .tiwsc-color-chip {
+  display:block; width:100%; height:180px;   /* fills the box like the competitor */
+  border:0; border-radius:0;
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+}
+
+/* ===== texts: keep yours, just tighten spacing ===== */
+.tiwsc-sample-color-name { font-size:14px; font-weight:600; margin:8px 0 2px; letter-spacing:.3px; }
+.tiwsc-sample-product-name { font-size:12px; color:#666; line-height:1.2; margin:0 0 10px; }
+
+/* ===== button: full-width, black like theirs; keep your “added” state ===== */
+.tiwsc-sample-item .tiwsc-add-sample-btn {
+  width:100% !important;
+  padding:10px 12px !important;
+  background:#000 !important; color:#fff !important;
+  border:1px solid #000 !important; border-radius:0 !important;
+  font-size:12px !important; font-weight:500 !important;
+  text-transform:uppercase !important; letter-spacing:.3px !important;
+  transition: background .2s, border-color .2s !important;
+}
+.tiwsc-sample-item .tiwsc-add-sample-btn:hover:not(.tiwsc-added) {
+  background:#222 !important; border-color:#222 !important;
+}
+
+/* responsive tweak (2 columns on small screens) */
+@media (max-width: 768px) {
+  .tiwsc-samples-catalog-grid { grid-template-columns: repeat(2, 1fr) !important; gap:8px !important; }
+  .tiwsc-sample-swatch .tiwsc-color-chip { height:120px; }
+}
+
+
