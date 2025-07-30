@@ -839,4 +839,92 @@ add_shortcode('tiwsc_sidebar_trigger', function($atts){
     <?php
     return ob_get_clean();
 });
+
+// Add sample cart icon to navigation menu
+add_action('wp_footer', function() {
+    if (!tiwsc_is_enabled()) return;
+    ?>
+    <script>
+    jQuery(document).ready(function($) {
+        // Wait for Elementor to load
+        setTimeout(function() {
+            // Find the search icon container
+            var searchIcon = $('.elementor-element-0855c96');
+            
+            if (searchIcon.length) {
+                // Create the sample cart icon HTML
+                var sampleCartIcon = `
+                    <div class="elementor-element tiwsc-nav-sample-icon elementor-position-left elementor-vertical-align-middle elementor-view-default elementor-mobile-position-top elementor-widget elementor-widget-icon-box" style="margin-right: 15px;">
+                        <div class="elementor-widget-container">
+                            <div class="elementor-icon-box-wrapper">
+                                <div class="elementor-icon-box-icon">
+                                    <a href="#" class="elementor-icon tiwsc-open-sidebar-link" tabindex="-1">
+                                        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                            <path d="m6,19c0,.552-.448,1-1,1s-1-.448-1-1,.448-1,1-1,1,.448,1,1Z" fill="none" stroke="currentColor"/>
+                                            <path d="M24,14v10H5c-2.757,0-5-2.243-5-5V0h10v6.929l4.899-4.9,7.071,7.071-4.899,4.899h6.929ZM9.95,19.708l10.607-10.607-5.657-5.657-4.899,4.9v10.657c0,.24-.017.476-.05.708ZM1,6h8V1H1v5Zm0,6h8v-5H1v5Zm8,7v-6H1v6c0,2.209,1.791,4,4,4s4-1.791,4-4Zm14-4h-6.929l-7.536,7.536c-.169.169-.347.323-.535.464h14.999v-8Z" fill="currentColor"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Insert before the search icon
+                searchIcon.before(sampleCartIcon);
+                
+                // Also add a sample count badge
+                var sampleCount = <?php 
+                    tiwsc_safe_session_start();
+                    echo isset($_SESSION['tiwsc_samples']) ? count($_SESSION['tiwsc_samples']) : 0;
+                ?>;
+                
+                if (sampleCount > 0) {
+                    $('.tiwsc-nav-sample-icon .elementor-icon').append('<span class="tiwsc-nav-badge">' + sampleCount + '</span>');
+                }
+            }
+        }, 1000);
+    });
+    </script>
+    <style>
+    .tiwsc-nav-sample-icon .elementor-icon {
+        position: relative;
+        color: #333;
+        transition: color 0.3s ease;
+    }
+    
+    .tiwsc-nav-sample-icon .elementor-icon:hover {
+        color: #88ae98;
+    }
+    
+    .tiwsc-nav-sample-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .tiwsc-nav-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #88ae98;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    /* Mobile styles */
+    @media (max-width: 768px) {
+        .tiwsc-nav-sample-icon {
+            display: none;
+        }
+    }
+    </style>
+    <?php
+});
 ?>

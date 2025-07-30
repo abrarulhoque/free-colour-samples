@@ -216,6 +216,9 @@ jQuery(document).ready(function ($) {
 
           // Auto-open sidebar when sample is added
           openSidebar()
+          
+          // Update badge count
+          loadSidebarContent();
         } else {
           $allButtons.removeClass('tiwsc-added')
           $allButtons.find('.tiwsc-free-sample-text').text('Gratis Kleurstaal')
@@ -292,6 +295,9 @@ jQuery(document).ready(function ($) {
 
           // Auto-open sidebar when sample is added
           openSidebar()
+          
+          // Update badge count
+          loadSidebarContent();
         } else {
           $this.removeClass('tiwsc-added')
           $this.find('.tiwsc-button-text').text(colorName)
@@ -553,7 +559,7 @@ jQuery(document).ready(function ($) {
               .attr('stroke', '#222')
           }
 
-          // Reload sidebar content
+          // Reload sidebar content (this will also update badge)
           loadSidebarContent()
 
           // Also update the unified main button
@@ -646,6 +652,9 @@ jQuery(document).ready(function ($) {
             .html('+ TOEVOEGEN')
             
           // Clear the addedMap since all samples were submitted
+          
+          // Clear navigation badge
+          updateNavBadge(0);
           addedMap.clear()
           
           // Update all forms
@@ -725,6 +734,22 @@ jQuery(document).ready(function ($) {
     }, 300) // Match the CSS transition duration
   }
 
+  // Function to update navigation badge
+  function updateNavBadge(count) {
+    var $navIcon = $('.tiwsc-nav-sample-icon .elementor-icon');
+    var $badge = $navIcon.find('.tiwsc-nav-badge');
+    
+    if (count > 0) {
+      if ($badge.length) {
+        $badge.text(count);
+      } else {
+        $navIcon.append('<span class="tiwsc-nav-badge">' + count + '</span>');
+      }
+    } else {
+      $badge.remove();
+    }
+  }
+
   // Function to load sidebar content
   function loadSidebarContent () {
     console.log('Loading sidebar content...')
@@ -742,6 +767,10 @@ jQuery(document).ready(function ($) {
       function (response) {
         console.log('Sidebar content loaded')
         $('#tiwsc-sidebar-content').html(response)
+        
+        // Update navigation badge with current sample count
+        var sampleCount = $('#tiwsc-sidebar-content .tiwsc-sample-item').length;
+        updateNavBadge(sampleCount);
       }
     ).fail(function (xhr, status, error) {
       console.error('Failed to load sidebar content:', status, error)
