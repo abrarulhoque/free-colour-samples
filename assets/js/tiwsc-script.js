@@ -8,6 +8,30 @@ jQuery(document).ready(function ($) {
   // Track which variations were added
   const ADDED_LABEL = 'Toegevoegd'; // change if your site uses a different text
   const addedMap = new Map(); // productId -> Set of "attribute=value&attribute2=value2"
+  
+  // Initialize addedMap with session data from server
+  if (typeof tiwsc_ajax !== 'undefined' && tiwsc_ajax.initial_samples) {
+    console.log('[TIWSC] Initializing with samples from session:', tiwsc_ajax.initial_samples)
+    tiwsc_ajax.initial_samples.forEach(function(sampleKey) {
+      if (sampleKey.indexOf('|') !== -1) {
+        // Variable product: product_id|attribute|value
+        const parts = sampleKey.split('|')
+        if (parts.length === 3) {
+          const productId = parts[0]
+          const attrName = parts[1]
+          const attrValue = parts[2]
+          // Convert to the format used in JavaScript
+          const key = 'attribute_' + attrName + '=' + attrValue
+          
+          if (!addedMap.has(productId)) {
+            addedMap.set(productId, new Set())
+          }
+          addedMap.get(productId).add(key)
+        }
+      }
+    })
+    console.log('[TIWSC] Initialized addedMap:', addedMap)
+  }
 
   function getFormPid($form) {
     return (
@@ -74,6 +98,50 @@ jQuery(document).ready(function ($) {
     $('form.variations_form').length
   )
   console.groupEnd()
+  
+  // Update button states for all forms on page load
+  console.log('[TIWSC] Updating button states for all forms on page load')
+  $('form.variations_form').each(function() {
+    console.log('[TIWSC] Updating form:', $(this).attr('id') || 'no-id', 'Product ID:', getFormPid($(this)))
+    updateForForm($(this))
+  })
+  
+  // Also update individual color sample buttons on page load
+  $('.tiwsc-variable-sample-button').each(function() {
+    const $btn = $(this)
+    const productId = $btn.data('product-id')
+    const attributeName = $btn.data('attribute-name')
+    const attributeValue = $btn.data('attribute-value')
+    const colorName = $btn.data('color-name')
+    
+    // Check if this specific variation is in the session
+    const set = addedMap.get(productId)
+    const key = 'attribute_' + attributeName + '=' + attributeValue
+    const isAdded = !!(set && set.has(key))
+    
+    if (isAdded) {
+      $btn.addClass('tiwsc-added')
+      $btn.find('.tiwsc-button-text').text('Toegevoegd')
+      $btn.find('svg path:first-child').attr('fill', '#88ae98')
+    }
+  })
+  
+  // Update samples page buttons on page load
+  $('.tiwsc-add-sample-btn').each(function() {
+    const $btn = $(this)
+    const productId = $btn.data('product-id')
+    const attributeName = $btn.data('attribute-name')
+    const attributeValue = $btn.data('attribute-value')
+    
+    // Check if this specific variation is in the session
+    const set = addedMap.get(productId)
+    const key = 'attribute_' + attributeName + '=' + attributeValue
+    const isAdded = !!(set && set.has(key))
+    
+    if (isAdded) {
+      $btn.addClass('tiwsc-added').html('TOEGEVOEGD')
+    }
+  })
 
   $('form.variations_form').on('found_variation', function (event, variation) {
     console.log('[TIWSC] found_variation event fired:', variation)
@@ -504,6 +572,19 @@ jQuery(document).ready(function ($) {
               .attr('fill', 'none')
               .attr('stroke', '#333')
           }
+          
+          // Update the addedMap to remove this variation
+          if (productId && attrName && attrValue) {
+            const key = 'attribute_' + attrName + '=' + attrValue
+            rememberSelection(productId, key, false)
+            
+            // Update form state for all forms with this product
+            $('form.variations_form').each(function() {
+              if (getFormPid($(this)) == productId) {
+                updateForForm($(this))
+              }
+            })
+          }
         }
       },
       'json'
@@ -563,6 +644,14 @@ jQuery(document).ready(function ($) {
           $('.tiwsc-add-sample-btn')
             .removeClass('tiwsc-added')
             .html('+ TOEVOEGEN')
+            
+          // Clear the addedMap since all samples were submitted
+          addedMap.clear()
+          
+          // Update all forms
+          $('form.variations_form').each(function() {
+            updateForForm($(this))
+          })
         }, 2000)
       }
     }).fail(function (xhr, status, error) {

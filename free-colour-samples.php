@@ -780,8 +780,13 @@ add_action('wp_enqueue_scripts', function() {
         '1.1.1',
         true
     );
+    // Get current session samples to initialize JavaScript state
+    tiwsc_safe_session_start();
+    $current_samples = isset($_SESSION['tiwsc_samples']) ? $_SESSION['tiwsc_samples'] : [];
+    
     wp_localize_script('tiwsc-script', 'tiwsc_ajax', [
-        'ajax_url' => admin_url('admin-ajax.php')
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'initial_samples' => $current_samples
     ]);
 });
 
