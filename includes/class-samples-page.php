@@ -114,19 +114,6 @@ class TIWSC_Samples_Page {
                 </div>
             </div>
         </div>
-        <script>
-        (function () {
-          function setTwoPaneHeight() {
-            var wrap = document.querySelector('.tiwsc-samples-layout');
-            if (!wrap) return;
-            var available = window.innerHeight - wrap.getBoundingClientRect().top;
-            wrap.style.setProperty('--tiwsc-two-pane-h', available + 'px');
-          }
-          window.addEventListener('load', setTwoPaneHeight);
-          window.addEventListener('resize', setTwoPaneHeight);
-          window.addEventListener('orientationchange', setTwoPaneHeight);
-        })();
-        </script>
         <?php
         return ob_get_clean();
     }
@@ -265,7 +252,7 @@ class TIWSC_Samples_Page {
                     foreach ($group['colors'] as $color):
                         $is_added = in_array($color['sample_key'], $session_samples, true);
                 ?>
-                        <div class="tiwsc-sample-item" data-master-color="<?php echo esc_attr($color['master_color']); ?>">
+                        <div class="tiwsc-sample-item">
                             <div class="tiwsc-sample-swatch">
                                 <?php echo $color['chip_html']; ?>
                             </div>

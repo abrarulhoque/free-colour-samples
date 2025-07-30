@@ -190,10 +190,9 @@
 
 /* Samples Grid */
 .tiwsc-samples-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  display: block;
   min-height: 400px;
+  width: 100%;
 }
 
 /* New Catalog-Style Grid - Override any theme styles */
@@ -227,17 +226,16 @@
   max-width: none !important;
 }
 
-/* Consolidated grid styles with width override */
+/* Consolidated grid styles */
 .tiwsc-samples-catalog-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
-  gap: 10px !important;
-  grid-gap: 10px !important;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+  gap: 24px !important;
   min-height: 400px !important;
-  width: calc(100vw - 280px) !important; /* Account for sidebar + padding */
-  max-width: 1200px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
 }
 
@@ -898,62 +896,34 @@
   }
 }
 
-/* desktop: two independent scrolls */
+/* Desktop layout improvements */
 @media (min-width: 1025px) {
   .tiwsc-samples-layout {
-    /* already display:flex; we just size it to the viewport */
-    height: var(--tiwsc-two-pane-h, 70vh);
-    min-height: 0;                 /* critical so children can scroll */
-    overflow: hidden;              /* keep scroll inside the columns */
+    align-items: flex-start;
+    gap: 40px;
   }
 
-  .tiwsc-filters-panel,
+  .tiwsc-filters-panel {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+  }
+
+  /* Ensure grid container takes full available width */
   .tiwsc-samples-grid-container {
-    height: 100%;
-    min-height: 0;
-    overflow: auto;
-    overscroll-behavior: contain;  /* stop wheel from bubbling to body */
-    -webkit-overflow-scrolling: touch;
-    scrollbar-gutter: stable;
-  }
-}
-
-/* optional: keep the grid header visible while the list scrolls */
-.tiwsc-grid-header { position: sticky; top: 0; background:#fff; z-index: 1; }
-
-/* desktop: let the grid column scroll on its own */
-@media (min-width: 1025px) {
-  .tiwsc-samples-grid-container,
-  #tiwsc-samples-grid {
-    height: 100%;
-    min-height: 0;
-    overflow: auto !important;      /* override overflow:visible !important */
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-/* desktop: keep two independent scrolls but hide the scrollbars */
-@media (min-width: 1025px) {
-  /* kill the page/body scrollbar on this screen */
-  .tiwsc-samples-page-container,
-  .tiwsc-samples-layout {
-    overflow: hidden !important;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
   }
 
-  /* both columns still scroll, just no visible rails */
-  .tiwsc-filters-panel,
-  .tiwsc-samples-grid-container,
-  #tiwsc-samples-grid {
-    overflow: auto !important;
-    -ms-overflow-style: none;   /* ie/old edge */
-    scrollbar-width: none;      /* firefox */
-    scrollbar-gutter: stable;   /* avoid layout shift if we later show bars */
-  }
-  .tiwsc-filters-panel::-webkit-scrollbar,
-  .tiwsc-samples-grid-container::-webkit-scrollbar,
-  #tiwsc-samples-grid::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
+  /* Keep grid header sticky */
+  .tiwsc-grid-header { 
+    position: sticky; 
+    top: 0; 
+    background: #fff; 
+    z-index: 10;
+    padding-top: 10px;
+    margin-top: -10px;
   }
 }
