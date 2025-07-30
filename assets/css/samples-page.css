@@ -28,32 +28,35 @@
 
 /* Filters Panel */
 .tiwsc-filters-panel {
-  flex: 0 0 200px;
-  background: #fff;
-  padding: 0;
-  border-radius: 0;
+  flex: 0 0 240px;
+  background: #fafafa;
+  padding: 24px;
+  border-radius: 8px;
   position: sticky;
   top: 20px;
+  border: 1px solid #e8e8e8;
 }
 
 .tiwsc-filters-panel h3 {
-  margin: 0 0 15px 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: #000;
+  margin: 0 0 20px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 /* Filter sections */
 .tiwsc-filter-section {
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .tiwsc-filter-section:last-of-type {
   border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .tiwsc-filter-checkboxes,
@@ -67,34 +70,43 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 8px 0;
-  transition: opacity 0.2s;
+  padding: 10px 0;
+  transition: all 0.2s ease;
+  border-radius: 4px;
 }
 
 .tiwsc-category-checkboxes .tiwsc-filter-checkbox {
   border-bottom: none;
-  padding: 5px 0;
+  padding: 8px 0;
 }
 
 .tiwsc-filter-checkbox:hover {
-  opacity: 0.8;
+  background: rgba(0, 0, 0, 0.02);
+  padding-left: 8px;
 }
 
 .tiwsc-filter-checkbox input[type='checkbox'] {
-  margin-right: 10px;
-  width: 20px;
-  height: 20px;
+  margin-right: 12px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  accent-color: #000;
+  accent-color: #1a1a1a;
+  border-radius: 3px;
 }
 
 .tiwsc-filter-color-dot {
   display: inline-block;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: 12px;
   flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.tiwsc-filter-checkbox:hover .tiwsc-filter-color-dot {
+  transform: scale(1.1);
 }
 
 .tiwsc-filter-label {
@@ -102,25 +114,30 @@
   color: #333;
   user-select: none;
   text-transform: capitalize;
+  font-weight: 400;
 }
 
 .tiwsc-clear-filters {
-  margin-top: 20px;
+  margin-top: 24px;
   width: 100%;
-  padding: 10px;
-  background: #fff;
-  border: 2px solid #000;
-  border-radius: 0;
+  padding: 12px;
+  background: transparent;
+  border: 2px solid #1a1a1a;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  color: #1a1a1a;
+  letter-spacing: 0.5px;
 }
 
 .tiwsc-clear-filters:hover {
-  background: #000;
+  background: #1a1a1a;
   color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Hide mobile filter toggle by default (desktop) */
@@ -145,26 +162,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+  background: #fff;
 }
 
 .tiwsc-grid-header h2 {
   margin: 0;
-  font-size: 20px;
-  font-weight: 500;
-  color: #000;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
 }
 
 .tiwsc-sample-count {
-  font-size: 14px;
+  font-size: 15px;
   color: #666;
+  font-weight: 400;
 }
 
 .tiwsc-count-number {
-  font-weight: 500;
-  color: #000;
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 16px;
 }
 
 /* Samples Grid */
@@ -442,16 +463,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
+  min-height: 400px;
 }
 
 .tiwsc-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #88ae98;
+  width: 48px;
+  height: 48px;
+  border: 3px solid #f0f0f0;
+  border-top: 3px solid #1a1a1a;
   border-radius: 50%;
-  animation: tiwsc-spin 1s linear infinite;
+  animation: tiwsc-spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes tiwsc-spin {
@@ -464,21 +486,31 @@
 }
 
 .tiwsc-loading p {
-  margin-top: 20px;
+  margin-top: 24px;
   color: #666;
   font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
 }
 
 /* No Results */
 .tiwsc-no-results {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .tiwsc-no-results p {
-  font-size: 16px;
+  font-size: 17px;
   color: #666;
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 /* Responsive Design */
@@ -669,88 +701,200 @@
 }
 
 
-/* additional css */
-/* ===== grid: tight, masonry-like columns with minimal gaps ===== */
+/* additional css - Modern Professional Design */
+/* ===== Grid Layout with Better Spacing ===== */
 .tiwsc-samples-page-container .tiwsc-samples-catalog-grid,
 #tiwsc-samples-grid .tiwsc-samples-catalog-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important; /* wider tiles */
-  gap: 12px !important;            /* minimal gaps like theirs */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+  gap: 24px !important;
   margin: 0 !important;
   padding: 0 !important;
   list-style: none !important;
   box-sizing: border-box !important;
 }
 
-/* ===== tile/card: flat rectangle, no extra padding or rounded corners ===== */
+/* ===== Sample Cards: Modern Design with Subtle Shadows ===== */
 .tiwsc-sample-item {
   display: flex !important;
   flex-direction: column !important;
   background: #fff !important;
-  border: 1px solid #e6e6e6 !important;
-  border-radius: 0 !important;
-  padding: 12px !important;        /* remove the “big padding” look */
-  transition: box-shadow .2s, border-color .2s !important;
+  border: 1px solid #e8e8e8 !important;
+  border-radius: 8px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
-.tiwsc-sample-item:hover { box-shadow: 0 2px 4px rgba(0,0,0,.06); border-color:#ccc; }
 
-/* ===== image/swatch: fill the card, fixed height for a proper rectangle ===== */
-.tiwsc-sample-swatch { width:100%; margin:0 0 10px; }
+.tiwsc-sample-item:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  border-color: #d0d0d0 !important;
+}
+
+/* ===== Color Swatch: Larger and More Prominent ===== */
+.tiwsc-sample-swatch {
+  width: 100%;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+
 .tiwsc-sample-swatch .tiwsc-color-chip {
-  display:block; width:100%; height:180px;   /* fills the box like the competitor */
-  border:0; border-radius:0;
-  background-size:cover; background-position:center; background-repeat:no-repeat;
+  display: block;
+  width: 100%;
+  height: 200px;
+  border: 0;
+  border-radius: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.3s ease;
 }
 
-/* ===== texts: keep yours, just tighten spacing ===== */
-.tiwsc-sample-color-name { font-size:14px; font-weight:600; margin:8px 0 2px; letter-spacing:.3px; }
-.tiwsc-sample-product-name { font-size:12px; color:#666; line-height:1.2; margin:0 0 10px; }
+.tiwsc-sample-item:hover .tiwsc-color-chip {
+  transform: scale(1.05);
+}
 
-/* ===== button: full-width, black like theirs; keep your “added” state ===== */
+/* ===== Content Area with Better Spacing ===== */
+.tiwsc-sample-info {
+  padding: 16px 20px 12px !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  text-align: left !important;
+  min-height: 60px !important;
+}
+
+/* ===== Typography Improvements ===== */
+.tiwsc-sample-color-name {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  margin: 0 0 4px 0 !important;
+  letter-spacing: 0.2px !important;
+  text-transform: uppercase !important;
+  line-height: 1.3 !important;
+}
+
+.tiwsc-sample-product-name {
+  font-size: 13px !important;
+  color: #666 !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+  text-align: left !important;
+}
+
+/* ===== Button Design: Modern and Interactive ===== */
 .tiwsc-sample-item .tiwsc-add-sample-btn {
-  width:100% !important;
-  padding:10px 12px !important;
-  background:#000 !important; color:#fff !important;
-  border:1px solid #000 !important; border-radius:0 !important;
-  font-size:12px !important; font-weight:500 !important;
-  text-transform:uppercase !important; letter-spacing:.3px !important;
-  transition: background .2s, border-color .2s !important;
+  width: calc(100% - 40px) !important;
+  margin: 0 20px 20px !important;
+  padding: 12px 20px !important;
+  background: #1a1a1a !important;
+  color: #fff !important;
+  border: 2px solid #1a1a1a !important;
+  border-radius: 4px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
+
 .tiwsc-sample-item .tiwsc-add-sample-btn:hover:not(.tiwsc-added) {
-  background:#222 !important; border-color:#222 !important;
+  background: transparent !important;
+  color: #1a1a1a !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* responsive tweak (2 columns on small screens) */
-@media (max-width: 768px) {
-  .tiwsc-samples-catalog-grid { grid-template-columns: repeat(2, 1fr) !important; gap:8px !important; }
-  .tiwsc-sample-swatch .tiwsc-color-chip { height:120px; }
+.tiwsc-sample-item .tiwsc-add-sample-btn.tiwsc-added {
+  background: #4caf50 !important;
+  border-color: #4caf50 !important;
+  color: #fff !important;
+  cursor: default !important;
 }
 
-/* mobile: force 2 columns and full width (override earlier rules) */
+.tiwsc-sample-item .tiwsc-add-sample-btn.tiwsc-added:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* responsive design for tablets */
 @media (max-width: 768px) {
   .tiwsc-samples-page-container .tiwsc-samples-catalog-grid,
   #tiwsc-samples-grid .tiwsc-samples-catalog-grid,
   .tiwsc-samples-catalog-grid {
-    width: 100% !important;                 /* kill calc(100vw - 280px) */
+    width: 100% !important;
     max-width: none !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important; /* no min 180px */
-    gap: 8px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
   }
 
-  .tiwsc-sample-item { padding: 8px !important; }
+  .tiwsc-sample-item {
+    border-radius: 6px !important;
+  }
+
   .tiwsc-sample-swatch .tiwsc-color-chip {
-    aspect-ratio: 4 / 3;                     /* consistent rectangle */
-    min-height: 120px;                        /* fallback */
-    height: auto !important;
+    height: 150px !important;
+  }
+
+  .tiwsc-sample-info {
+    padding: 12px 16px 8px !important;
+    min-height: 50px !important;
+  }
+
+  .tiwsc-sample-color-name {
+    font-size: 14px !important;
+  }
+
+  .tiwsc-sample-product-name {
+    font-size: 12px !important;
+  }
+
+  .tiwsc-sample-item .tiwsc-add-sample-btn {
+    width: calc(100% - 32px) !important;
+    margin: 0 16px 16px !important;
+    padding: 10px 16px !important;
+    font-size: 12px !important;
   }
 }
 
-/* keep 2 cols even on very small phones */
+/* responsive design for mobile phones */
 @media (max-width: 480px) {
   .tiwsc-samples-page-container .tiwsc-samples-catalog-grid,
   #tiwsc-samples-grid .tiwsc-samples-catalog-grid,
   .tiwsc-samples-catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .tiwsc-sample-swatch .tiwsc-color-chip {
+    height: 120px !important;
+  }
+
+  .tiwsc-sample-info {
+    padding: 10px 12px 6px !important;
+  }
+
+  .tiwsc-sample-color-name {
+    font-size: 13px !important;
+    margin: 0 0 2px 0 !important;
+  }
+
+  .tiwsc-sample-product-name {
+    font-size: 11px !important;
+  }
+
+  .tiwsc-sample-item .tiwsc-add-sample-btn {
+    width: calc(100% - 24px) !important;
+    margin: 0 12px 12px !important;
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.3px !important;
   }
 }
 
