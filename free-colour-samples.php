@@ -848,13 +848,16 @@ add_action('wp_footer', function() {
     jQuery(document).ready(function($) {
         // Wait for Elementor to load
         setTimeout(function() {
-            // Find the search icon container
-            var searchIcon = $('.elementor-element-0855c96');
+            // Get initial sample count
+            var sampleCount = <?php 
+                tiwsc_safe_session_start();
+                echo isset($_SESSION['tiwsc_samples']) ? count($_SESSION['tiwsc_samples']) : 0;
+            ?>;
             
-            if (searchIcon.length) {
-                // Create the sample cart icon HTML
-                var sampleCartIcon = `
-                    <div class="elementor-element tiwsc-nav-sample-icon elementor-position-left elementor-vertical-align-middle elementor-view-default elementor-mobile-position-top elementor-widget elementor-widget-icon-box" style="margin-right: 15px;">
+            // Create the sample cart icon HTML
+            var createSampleIcon = function(additionalClasses = '') {
+                return `
+                    <div class="elementor-element tiwsc-nav-sample-icon elementor-position-left elementor-vertical-align-middle elementor-view-default elementor-mobile-position-top elementor-widget elementor-widget-icon-box ${additionalClasses}" style="margin-right: 15px;">
                         <div class="elementor-widget-container">
                             <div class="elementor-icon-box-wrapper">
                                 <div class="elementor-icon-box-icon">
@@ -863,25 +866,27 @@ add_action('wp_footer', function() {
                                             <path d="m6,19c0,.552-.448,1-1,1s-1-.448-1-1,.448-1,1-1,1,.448,1,1Z" fill="none" stroke="currentColor"/>
                                             <path d="M24,14v10H5c-2.757,0-5-2.243-5-5V0h10v6.929l4.899-4.9,7.071,7.071-4.899,4.899h6.929ZM9.95,19.708l10.607-10.607-5.657-5.657-4.899,4.9v10.657c0,.24-.017.476-.05.708ZM1,6h8V1H1v5Zm0,6h8v-5H1v5Zm8,7v-6H1v6c0,2.209,1.791,4,4,4s4-1.791,4-4Zm14-4h-6.929l-7.536,7.536c-.169.169-.347.323-.535.464h14.999v-8Z" fill="currentColor"/>
                                         </svg>
+                                        ${sampleCount > 0 ? '<span class="tiwsc-nav-badge">' + sampleCount + '</span>' : ''}
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 `;
-                
-                // Insert before the search icon
-                searchIcon.before(sampleCartIcon);
-                
-                // Also add a sample count badge
-                var sampleCount = <?php 
-                    tiwsc_safe_session_start();
-                    echo isset($_SESSION['tiwsc_samples']) ? count($_SESSION['tiwsc_samples']) : 0;
-                ?>;
-                
-                if (sampleCount > 0) {
-                    $('.tiwsc-nav-sample-icon .elementor-icon').append('<span class="tiwsc-nav-badge">' + sampleCount + '</span>');
-                }
+            };
+            
+            // Desktop header - Find the search icon container
+            var desktopSearchIcon = $('.elementor-element-0855c96').not('.elementor-hidden-desktop');
+            if (desktopSearchIcon.length) {
+                // Insert before the search icon on desktop
+                desktopSearchIcon.before(createSampleIcon('tiwsc-desktop-icon'));
+            }
+            
+            // Mobile header - Find the cart icon container
+            var mobileCartIcon = $('.elementor-element-f4bea9f');
+            if (mobileCartIcon.length) {
+                // Insert after the cart icon on mobile
+                mobileCartIcon.after(createSampleIcon('tiwsc-mobile-icon'));
             }
         }, 1000);
     });
@@ -920,7 +925,24 @@ add_action('wp_footer', function() {
     
     /* Mobile styles */
     @media (max-width: 768px) {
-        .tiwsc-nav-sample-icon {
+        .tiwsc-nav-sample-icon.tiwsc-desktop-icon {
+            display: none;
+        }
+        
+        .tiwsc-nav-sample-icon.tiwsc-mobile-icon {
+            display: block;
+            margin-right: 10px;
+        }
+        
+        .tiwsc-nav-sample-icon.tiwsc-mobile-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+    }
+    
+    /* Desktop styles */
+    @media (min-width: 769px) {
+        .tiwsc-nav-sample-icon.tiwsc-mobile-icon {
             display: none;
         }
     }

@@ -736,18 +736,21 @@ jQuery(document).ready(function ($) {
 
   // Function to update navigation badge
   function updateNavBadge(count) {
-    var $navIcon = $('.tiwsc-nav-sample-icon .elementor-icon');
-    var $badge = $navIcon.find('.tiwsc-nav-badge');
-    
-    if (count > 0) {
-      if ($badge.length) {
-        $badge.text(count);
+    // Update all navigation icons (both desktop and mobile)
+    $('.tiwsc-nav-sample-icon .elementor-icon').each(function() {
+      var $icon = $(this);
+      var $badge = $icon.find('.tiwsc-nav-badge');
+      
+      if (count > 0) {
+        if ($badge.length) {
+          $badge.text(count);
+        } else {
+          $icon.append('<span class="tiwsc-nav-badge">' + count + '</span>');
+        }
       } else {
-        $navIcon.append('<span class="tiwsc-nav-badge">' + count + '</span>');
+        $badge.remove();
       }
-    } else {
-      $badge.remove();
-    }
+    });
   }
 
   // Function to load sidebar content
