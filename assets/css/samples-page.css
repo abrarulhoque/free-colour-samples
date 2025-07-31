@@ -830,10 +830,16 @@
     max-width: none !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 16px !important;
+    grid-auto-rows: 1fr !important; /* Make all rows same height */
   }
 
+  /* Make cards stretch to full height and align content */
   .tiwsc-sample-item {
     border-radius: 6px !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
   }
 
   .tiwsc-sample-swatch .tiwsc-color-chip {
@@ -843,14 +849,25 @@
   .tiwsc-sample-info {
     padding: 12px 16px 8px !important;
     min-height: 50px !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
   }
 
   .tiwsc-sample-color-name {
     font-size: 14px !important;
+    min-height: 22px !important;
+    display: flex !important;
+    align-items: center !important;
   }
 
   .tiwsc-sample-product-name {
     font-size: 12px !important;
+    min-height: 36px !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    line-height: 1.5 !important;
   }
 
   .tiwsc-sample-item .tiwsc-add-sample-btn {
@@ -858,6 +875,7 @@
     margin: 0 16px 16px !important;
     padding: 10px 16px !important;
     font-size: 12px !important;
+    align-self: stretch !important;
   }
 }
 
@@ -868,6 +886,15 @@
   .tiwsc-samples-catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 12px !important;
+    grid-auto-rows: 1fr !important; /* Make all rows same height */
+  }
+
+  /* Make cards stretch to full height and align content */
+  .tiwsc-sample-item {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
   }
 
   .tiwsc-sample-swatch .tiwsc-color-chip {
@@ -876,15 +903,26 @@
 
   .tiwsc-sample-info {
     padding: 10px 12px 6px !important;
+    flex: 1 !important; /* Allow info section to grow */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
   }
 
   .tiwsc-sample-color-name {
     font-size: 13px !important;
     margin: 0 0 2px 0 !important;
+    min-height: 20px !important; /* Ensure consistent height */
+    display: flex !important;
+    align-items: center !important;
   }
 
   .tiwsc-sample-product-name {
     font-size: 11px !important;
+    min-height: 32px !important; /* Reserve space for 2 lines */
+    display: flex !important;
+    align-items: flex-start !important;
+    line-height: 1.45 !important;
   }
 
   .tiwsc-sample-item .tiwsc-add-sample-btn {
@@ -893,6 +931,7 @@
     padding: 8px 12px !important;
     font-size: 11px !important;
     letter-spacing: 0.3px !important;
+    align-self: stretch !important; /* Ensure button stays at bottom */
   }
 }
 
