@@ -172,6 +172,85 @@ jQuery(document).ready(function ($) {
   )
   console.groupEnd()
   
+  // ===== TIWSC DEBUG INSTRUMENTATION BEGIN =====
+  const tiwscDebug = true; // temporary debugging flag
+  if (tiwscDebug) {
+    // Wrap getAttrKey to log raw values and final key
+    const _getAttrKey = getAttrKey;
+    getAttrKey = function($form) {
+      const rawValues = [];
+      $form.find('select[name^="attribute_"]').each(function() {
+        rawValues.push({ name: $(this).attr('name'), value: $(this).val() });
+      });
+      const key = _getAttrKey($form);
+      console.log('[TIWSC DEBUG] getAttrKey', { pid: getFormPid($form), key, rawValues });
+      return key;
+    };
+
+    // Wrap renderState to log button counts and final state
+    const _renderState = renderState;
+    renderState = function($form, isAdded) {
+      const pid = getFormPid($form);
+      const $buttons = findMainButtons($form);
+      _renderState($form, isAdded);
+      console.log('[TIWSC DEBUG] renderState', { pid, isAdded, mainButtonCount: $buttons.length });
+      $buttons.each(function(idx) {
+        const $btn = $(this);
+        const $label = $btn.find('.tiwsc-button-text, .tiwsc-free-sample-text');
+        const txt = $.trim($label.length ? $label.text() : $btn.text());
+        console.log('[TIWSC DEBUG]  └─ button', idx, { text: txt, hasAddedClass: $btn.hasClass('tiwsc-added') });
+      });
+    };
+
+    // Wrap updateForForm to log inputs / addedMap lookup
+    const _updateForForm = updateForForm;
+    updateForForm = function($form) {
+      const pid = getFormPid($form);
+      const key = getAttrKey($form);
+      const set = pid && addedMap.get(pid);
+      const isAdded = !!(set && key && set.has(key));
+      console.log('[TIWSC DEBUG] updateForForm', { pid, key, addedSet: set ? Array.from(set) : [], isAdded });
+      _updateForForm($form);
+    };
+
+    // Debounce helper so we can call after plugin DOM updates
+    const tiwscUpdateTimers = new WeakMap();
+    window.tiwscScheduleUpdate = function($form, origin) {
+      if (!($form && $form.length)) return;
+      const formEl = $form[0];
+      if (tiwscUpdateTimers.has(formEl)) {
+        clearTimeout(tiwscUpdateTimers.get(formEl));
+      }
+      const t = setTimeout(function() {
+        console.log('[TIWSC DEBUG] debounced updateForForm run (origin: ' + origin + ')');
+        updateForForm($form);
+        tiwscUpdateTimers.delete(formEl);
+      }, 0);
+      tiwscUpdateTimers.set(formEl, t);
+    };
+
+    // Observe DOM mutations that might replace selects or buttons
+    function observeMutations($target, label) {
+      if (!$target.length) return;
+      const obs = new MutationObserver(function(muts) {
+        muts.forEach(function(m) {
+          console.log('[TIWSC DEBUG] Mutation@' + label, { added: m.addedNodes.length, removed: m.removedNodes.length });
+        });
+      });
+      obs.observe($target[0], { childList: true, subtree: true });
+    }
+
+    $(FORM_SELECTOR).each(function() {
+      const $f = $(this);
+      const pid = getFormPid($f);
+      observeMutations($f.find('.variations, .cfvsw-swatches-container').first(), 'variations-' + pid);
+      findMainButtons($f).each(function(i, el) {
+        if (el && el.parentNode) observeMutations($(el.parentNode), 'mainBtnParent-' + pid + '-' + i);
+      });
+    });
+  }
+  // ===== TIWSC DEBUG INSTRUMENTATION END =====
+  
   // Update button states for all forms on page load
   console.log('[TIWSC] Updating button states for all forms on page load')
   $(FORM_SELECTOR).each(function() {
@@ -218,7 +297,8 @@ jQuery(document).ready(function ($) {
 
   $(FORM_SELECTOR).on('found_variation', function (event, variation) {
     console.log('[TIWSC] found_variation event fired:', variation)
-    updateForForm($(this)); // Update button state when variation is found
+    updateForForm($(this)); // immediate update
+    if (window.tiwscScheduleUpdate) tiwscScheduleUpdate($(this), 'found_variation'); // debounced
   })
 
   $(FORM_SELECTOR).on('reset_data', function () {
@@ -236,6 +316,7 @@ jQuery(document).ready(function ($) {
       $form.find('select').trigger('change')
       // Update button state after swatch selection
       updateForForm($form)
+      if (window.tiwscScheduleUpdate) tiwscScheduleUpdate($form, 'swatch');
     }, 50)
   })
 
