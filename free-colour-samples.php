@@ -585,7 +585,7 @@ function tiwsc_get_sidebar_callback() {
     echo '<ul>
             <li>' . __('Binnen 1 werkdag verzonden', 'free-colour-samples') . '</li>
         </ul>';
-    echo '<button type="submit"><span><img width="auto" height="auto" src="' . plugins_url('assets/images/arrow_black_right_small.png', __FILE__) . '" alt="" /></span>' . __('Nu aanvragen', 'free-colour-samples') . '</button>';
+    echo '<button type="submit"><span><img width="auto" height="auto" src="' . plugins_url('assets/images/arrow_black_right_small.svg', __FILE__) . '" alt="" /></span>' . __('Nu aanvragen', 'free-colour-samples') . '</button>';
     echo '</form>';
     echo '<div id="tiwsc-sample-form-result"></div>';
     echo '</div>';

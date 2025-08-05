@@ -46,29 +46,85 @@ jQuery(document).ready(function ($) {
   }
 
   // Build a unique key that represents the *current* attribute selections for
-  // this form.  We no longer restrict the search to selects that are direct
-  // children of the `.variations` table because cfvsw keeps its synchronised
-  // (hidden) selects in a separate wrapper. Using a broader selector ensures
-  // we always pick up the real values regardless of the markup structure.
+  // this form. This function now checks for swatch plugins (cfvsw) that may
+  // update their UI before updating the hidden select values. We prioritize
+  // the swatch selection when available, falling back to select values.
   function getAttrKey($form) {
     const parts = [];
     $form.find('select[name^="attribute_"]').each(function () {
-      const v = $(this).val();
-      const n = $(this).attr('name');
-      if (v) parts.push(n + '=' + v);
+      const $select = $(this);
+      const name = $select.attr('name');
+      const selectValue = $select.val();
+      const attrName = name.replace('attribute_', '');
+      
+      // Check for cfvsw selected swatch first (multiple possible selectors)
+      let finalValue = selectValue;
+      const swatchSelectors = [
+        `[swatches-attr="${name}"] .cfvsw-selected-swatch`,
+        `[swatches-attr="${attrName}"] .cfvsw-selected-swatch`,
+        `.cfvsw-swatches-container[swatches-attr="${name}"] .cfvsw-selected-swatch`,
+        `.cfvsw-swatches-container[swatches-attr="${attrName}"] .cfvsw-selected-swatch`
+      ];
+      
+      for (const selector of swatchSelectors) {
+        const $swatch = $form.find(selector);
+        if ($swatch.length) {
+          const swatchValue = $swatch.attr('data-slug') || $swatch.data('slug') || $swatch.attr('data-value');
+          if (swatchValue) {
+            finalValue = swatchValue;
+            break;
+          }
+        }
+      }
+      
+      // Also check tp-woo swatches (different plugin)
+      if (finalValue === selectValue) {
+        const $tpSwatch = $form.find(`.tp-woo-swatches[data-attribute_name="${name}"] .tp-swatches.selected`);
+        if ($tpSwatch.length) {
+          const tpValue = $tpSwatch.data('value');
+          if (tpValue) finalValue = tpValue;
+        }
+      }
+      
+      if (finalValue) parts.push(name + '=' + finalValue);
     });
     return parts.join('&'); // unique enough per selection
   }
 
   // ---------------- Helper functions to locate buttons regardless of DOM placement ----------------
   // Find all main variable sample buttons for the product associated with this form.
+  // This enhanced version handles buttons both inside and outside the form, including
+  // those in sticky headers, quick views, or dynamically inserted elements.
   function findMainButtons($form) {
     const pid = getFormPid($form);
     if (!pid) return $();
+    
+    // Primary selector for buttons with matching product ID
     const selector = ".tiwsc-variable-sample-main-button[data-product-id='" + pid + "']";
-    const $inForm = $form.find(selector);
-    const $global = $(selector);
-    return $inForm.add($global); // merge & dedupe
+    
+    // Start with buttons inside the form
+    let $buttons = $form.find(selector);
+    
+    // Add global buttons with matching product ID
+    $buttons = $buttons.add($(selector));
+    
+    // Fallback: Look for buttons in common product wrapper patterns
+    if ($buttons.length === 0) {
+      // Try to find the product wrapper
+      const $productWrapper = $form.closest('.product, [data-product-id="' + pid + '"], .type-product');
+      if ($productWrapper.length) {
+        $buttons = $productWrapper.find('.tiwsc-variable-sample-main-button');
+      }
+      
+      // Also check for buttons in sticky/fixed headers that might reference this product
+      const $stickyButtons = $('.elementor-sticky, .sticky-header, .fixed-header').find(selector);
+      $buttons = $buttons.add($stickyButtons);
+    }
+    
+    // Remove duplicates and return
+    return $buttons.filter(function(index, elem) {
+      return index === $buttons.index(elem);
+    });
   }
 
   // Find per-color tile buttons for the product (used for optional visual sync)
@@ -143,12 +199,37 @@ jQuery(document).ready(function ($) {
     });
   }
 
+  // Event coalescing to prevent duplicate updates
+  const updateTimers = new WeakMap();
+  const lastUpdateKeys = new WeakMap();
+  
   function updateForForm($form) {
     const pid = getFormPid($form);
     const key = getAttrKey($form);
     const set = pid && addedMap.get(pid);
     const isAdded = !!(set && key && set.has(key));
-    renderState($form, isAdded);
+    
+    // Check if we just updated with the same key
+    const formEl = $form[0];
+    const lastKey = lastUpdateKeys.get(formEl);
+    if (lastKey === key) {
+      // Same state, skip redundant update
+      return;
+    }
+    
+    // Clear any pending update for this form
+    if (updateTimers.has(formEl)) {
+      clearTimeout(updateTimers.get(formEl));
+    }
+    
+    // Schedule coalesced update
+    const timer = setTimeout(function() {
+      lastUpdateKeys.set(formEl, key);
+      renderState($form, isAdded);
+      updateTimers.delete(formEl);
+    }, 10); // 10ms coalesce window
+    
+    updateTimers.set(formEl, timer);
   }
 
   function rememberSelection(pidOrForm, key, added) {
@@ -175,57 +256,116 @@ jQuery(document).ready(function ($) {
   // ===== TIWSC DEBUG INSTRUMENTATION BEGIN =====
   const tiwscDebug = true; // temporary debugging flag
   if (tiwscDebug) {
-    // Wrap getAttrKey to log raw values and final key
+    // Store original functions
     const _getAttrKey = getAttrKey;
+    const _renderState = renderState;
+    const _updateForForm = updateForForm;
+    
+    // Enhanced getAttrKey wrapper with swatch detection
     getAttrKey = function($form) {
-      const rawValues = [];
+      const pid = getFormPid($form);
+      const parts = [];
+      const debugData = { pid, selects: [], swatches: [] };
+      
       $form.find('select[name^="attribute_"]').each(function() {
-        rawValues.push({ name: $(this).attr('name'), value: $(this).val() });
+        const $select = $(this);
+        const name = $select.attr('name');
+        const value = $select.val();
+        const attrName = name.replace('attribute_', '');
+        
+        debugData.selects.push({ name, value });
+        
+        // Check for cfvsw selected swatch
+        const swatchSelectors = [
+          `[swatches-attr="${name}"] .cfvsw-selected-swatch`,
+          `[swatches-attr="attribute_${attrName}"] .cfvsw-selected-swatch`,
+          `[swatches-attr="${attrName}"] .cfvsw-selected-swatch`,
+          `.cfvsw-swatches-container[swatches-attr="${name}"] .cfvsw-selected-swatch`,
+          `.cfvsw-swatches-container[swatches-attr="${attrName}"] .cfvsw-selected-swatch`
+        ];
+        
+        let swatchValue = null;
+        for (const selector of swatchSelectors) {
+          const $swatch = $form.find(selector);
+          if ($swatch.length) {
+            swatchValue = $swatch.attr('data-slug') || $swatch.data('slug') || $swatch.attr('data-value');
+            debugData.swatches.push({ selector, value: swatchValue });
+            break;
+          }
+        }
+        
+        // Use swatch value if found, otherwise select value
+        const finalValue = swatchValue || value;
+        if (finalValue) {
+          parts.push(name + '=' + finalValue);
+        }
       });
-      const key = _getAttrKey($form);
-      console.log('[TIWSC DEBUG] getAttrKey', { pid: getFormPid($form), key, rawValues });
+      
+      const key = parts.join('&');
+      console.log('[TIWSC DEBUG] getAttrKey ENHANCED', { ...debugData, finalKey: key });
       return key;
     };
 
     // Wrap renderState to log button counts and final state
-    const _renderState = renderState;
     renderState = function($form, isAdded) {
       const pid = getFormPid($form);
       const $buttons = findMainButtons($form);
+      console.log('[TIWSC DEBUG] renderState BEFORE', { pid, isAdded, mainButtonCount: $buttons.length });
+      
       _renderState($form, isAdded);
-      console.log('[TIWSC DEBUG] renderState', { pid, isAdded, mainButtonCount: $buttons.length });
+      
       $buttons.each(function(idx) {
         const $btn = $(this);
         const $label = $btn.find('.tiwsc-button-text, .tiwsc-free-sample-text');
         const txt = $.trim($label.length ? $label.text() : $btn.text());
-        console.log('[TIWSC DEBUG]  └─ button', idx, { text: txt, hasAddedClass: $btn.hasClass('tiwsc-added') });
+        const svg = $btn.find('svg path:first-child');
+        console.log('[TIWSC DEBUG]  └─ button', idx, { 
+          text: txt, 
+          hasAddedClass: $btn.hasClass('tiwsc-added'),
+          svgFill: svg.attr('fill'),
+          svgStroke: svg.attr('stroke')
+        });
       });
     };
 
     // Wrap updateForForm to log inputs / addedMap lookup
-    const _updateForForm = updateForForm;
     updateForForm = function($form) {
       const pid = getFormPid($form);
       const key = getAttrKey($form);
       const set = pid && addedMap.get(pid);
       const isAdded = !!(set && key && set.has(key));
-      console.log('[TIWSC DEBUG] updateForForm', { pid, key, addedSet: set ? Array.from(set) : [], isAdded });
+      console.log('[TIWSC DEBUG] updateForForm CALLED', { 
+        pid, 
+        key, 
+        addedSet: set ? Array.from(set) : [], 
+        isAdded,
+        timestamp: Date.now()
+      });
       _updateForForm($form);
     };
 
-    // Debounce helper so we can call after plugin DOM updates
+    // Debounce helper with promise-based microtask
     const tiwscUpdateTimers = new WeakMap();
     window.tiwscScheduleUpdate = function($form, origin) {
       if (!($form && $form.length)) return;
       const formEl = $form[0];
+      
       if (tiwscUpdateTimers.has(formEl)) {
         clearTimeout(tiwscUpdateTimers.get(formEl));
       }
+      
+      // Use Promise microtask for immediate but deferred execution
+      Promise.resolve().then(function() {
+        console.log('[TIWSC DEBUG] microtask updateForForm (origin: ' + origin + ')');
+        updateForForm($form);
+      });
+      
+      // Also schedule with setTimeout as fallback
       const t = setTimeout(function() {
-        console.log('[TIWSC DEBUG] debounced updateForForm run (origin: ' + origin + ')');
+        console.log('[TIWSC DEBUG] timeout updateForForm (origin: ' + origin + ')');
         updateForForm($form);
         tiwscUpdateTimers.delete(formEl);
-      }, 0);
+      }, 50);
       tiwscUpdateTimers.set(formEl, t);
     };
 
@@ -233,19 +373,47 @@ jQuery(document).ready(function ($) {
     function observeMutations($target, label) {
       if (!$target.length) return;
       const obs = new MutationObserver(function(muts) {
-        muts.forEach(function(m) {
-          console.log('[TIWSC DEBUG] Mutation@' + label, { added: m.addedNodes.length, removed: m.removedNodes.length });
-        });
+        const hasChanges = muts.some(m => m.addedNodes.length > 0 || m.removedNodes.length > 0);
+        if (hasChanges) {
+          console.log('[TIWSC DEBUG] Mutation@' + label, { 
+            mutations: muts.length,
+            timestamp: Date.now()
+          });
+        }
       });
-      obs.observe($target[0], { childList: true, subtree: true });
+      obs.observe($target[0], { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
     }
 
+    // Monitor all forms and their key areas
     $(FORM_SELECTOR).each(function() {
       const $f = $(this);
       const pid = getFormPid($f);
+      
+      // Monitor variation areas
       observeMutations($f.find('.variations, .cfvsw-swatches-container').first(), 'variations-' + pid);
+      
+      // Monitor swatch containers
+      $f.find('[swatches-attr]').each(function(i) {
+        observeMutations($(this), 'swatches-' + pid + '-' + i);
+      });
+      
+      // Monitor main buttons
       findMainButtons($f).each(function(i, el) {
         if (el && el.parentNode) observeMutations($(el.parentNode), 'mainBtnParent-' + pid + '-' + i);
+      });
+    });
+    
+    // Log variation form events
+    $(FORM_SELECTOR).on('found_variation.debug', function(e, variation) {
+      console.log('[TIWSC DEBUG] EVENT: found_variation', { 
+        variation: variation.attributes,
+        timestamp: Date.now()
+      });
+    });
+    
+    $(FORM_SELECTOR).on('woocommerce_variation_has_changed.debug', function() {
+      console.log('[TIWSC DEBUG] EVENT: woocommerce_variation_has_changed', { 
+        timestamp: Date.now()
       });
     });
   }
@@ -297,8 +465,11 @@ jQuery(document).ready(function ($) {
 
   $(FORM_SELECTOR).on('found_variation', function (event, variation) {
     console.log('[TIWSC] found_variation event fired:', variation)
-    updateForForm($(this)); // immediate update
-    if (window.tiwscScheduleUpdate) tiwscScheduleUpdate($(this), 'found_variation'); // debounced
+    const $form = $(this);
+    // Use microtask to ensure swatch plugins have updated their DOM
+    Promise.resolve().then(function() {
+      updateForForm($form);
+    });
   })
 
   $(FORM_SELECTOR).on('reset_data', function () {
@@ -310,14 +481,11 @@ jQuery(document).ready(function ($) {
   $(document).on('click', '.cfvsw-swatches-option', function() {
     console.log('[TIWSC] Swatch clicked:', $(this).attr('data-slug'))
     const $form = $(this).closest(FORM_SELECTOR)
-    // Small delay to ensure the swatch plugin has updated the select
-    setTimeout(function() {
-      // Trigger change on the select to ensure WooCommerce updates
-      $form.find('select').trigger('change')
+    // Use microtask to ensure the swatch plugin has updated the DOM
+    Promise.resolve().then(function() {
       // Update button state after swatch selection
       updateForForm($form)
-      if (window.tiwscScheduleUpdate) tiwscScheduleUpdate($form, 'swatch');
-    }, 50)
+    });
   })
 
   // Check if sidebar elements exist
@@ -964,18 +1132,24 @@ jQuery(document).ready(function ($) {
   // Whenever the variation changes, re-evaluate state
   $(FORM_SELECTOR)
     .on('change', 'select[name^="attribute_"]', function () {
-      updateForForm($(this).closest(FORM_SELECTOR));
+      const $form = $(this).closest(FORM_SELECTOR);
+      Promise.resolve().then(function() {
+        updateForForm($form);
+      });
     })
     .on('woocommerce_variation_has_changed', function () {
-      updateForForm($(this));
+      const $form = $(this);
+      Promise.resolve().then(function() {
+        updateForForm($form);
+      });
     });
 
   // Cover popular swatch plugins (you have both tp-woo-swatches and cfvsw markup)
-  $(document).on('click', '.cfvsw-swatches-option, .tp-woo-swatches .tp-swatches', function () {
+  $(document).on('click', '.tp-woo-swatches .tp-swatches', function () {
     const $form = $(this).closest(FORM_SELECTOR);
-    setTimeout(function () {
+    Promise.resolve().then(function() {
       updateForForm($form);
-    }, 50);
+    });
   });
 
   // Reset link should clear the visual state
