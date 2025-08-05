@@ -71,11 +71,35 @@ jQuery(document).ready(function ($) {
       '.tiwsc-variable-sample-main-button, .tiwsc-free-sample-link, .tiwsc-add-sample-btn'
     );
     if (!$btn.length) return;
-    cacheDefaultLabel($btn);
-    if (isAdded) {
-      $btn.addClass('tiwsc-added').text(ADDED_LABEL);
+
+    // Find the label span within the button (preferred)   
+    const $label = $btn.find('.tiwsc-button-text, .tiwsc-free-sample-text');
+
+    // Cache the default label text once. We store it on the label element
+    // itself when present, otherwise fall back to the button (legacy case).
+    if ($label.length) {
+      cacheDefaultLabel($label);
     } else {
-      $btn.removeClass('tiwsc-added').text($btn.data('label-default'));
+      cacheDefaultLabel($btn);
+    }
+
+    if (isAdded) {
+      // Mark button as added and update label text only.
+      $btn.addClass('tiwsc-added');
+      if ($label.length) {
+        $label.text(ADDED_LABEL);
+      } else {
+        // Legacy fallback when there is no dedicated label span.
+        $btn.text(ADDED_LABEL);
+      }
+    } else {
+      // Revert button state and restore original label.
+      $btn.removeClass('tiwsc-added');
+      if ($label.length) {
+        $label.text($label.data('label-default') || 'Gratis Kleurstaal');
+      } else {
+        $btn.text($btn.data('label-default') || 'Gratis Kleurstaal');
+      }
     }
   }
 
