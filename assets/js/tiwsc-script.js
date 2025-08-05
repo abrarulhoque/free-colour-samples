@@ -60,6 +60,24 @@ jQuery(document).ready(function ($) {
     return parts.join('&'); // unique enough per selection
   }
 
+  // ---------------- Helper functions to locate buttons regardless of DOM placement ----------------
+  // Find all main variable sample buttons for the product associated with this form.
+  function findMainButtons($form) {
+    const pid = getFormPid($form);
+    if (!pid) return $();
+    const selector = ".tiwsc-variable-sample-main-button[data-product-id='" + pid + "']";
+    const $inForm = $form.find(selector);
+    const $global = $(selector);
+    return $inForm.add($global); // merge & dedupe
+  }
+
+  // Find per-color tile buttons for the product (used for optional visual sync)
+  function findPerColorButtons($form) {
+    const pid = getFormPid($form);
+    if (!pid) return $();
+    return $(".tiwsc-variable-sample-button[data-product-id='" + pid + "']");
+  }
+
   function cacheDefaultLabel($btn) {
     if (!$btn.data('label-default')) {
       $btn.data('label-default', $.trim($btn.text()));
@@ -67,40 +85,62 @@ jQuery(document).ready(function ($) {
   }
 
   function renderState($form, isAdded) {
-    const $btn = $form.find(
-      '.tiwsc-variable-sample-main-button, .tiwsc-free-sample-link, .tiwsc-add-sample-btn'
-    );
-    if (!$btn.length) return;
+    // Update all main buttons for this product, regardless of where they live in the DOM
+    const $mainBtns = findMainButtons($form);
 
-    // Find the label span within the button (preferred)   
-    const $label = $btn.find('.tiwsc-button-text, .tiwsc-free-sample-text');
+    $mainBtns.each(function () {
+      const $btn = $(this);
+      const $label = $btn.find('.tiwsc-button-text, .tiwsc-free-sample-text');
 
-    // Cache the default label text once. We store it on the label element
-    // itself when present, otherwise fall back to the button (legacy case).
-    if ($label.length) {
-      cacheDefaultLabel($label);
-    } else {
-      cacheDefaultLabel($btn);
-    }
-
-    if (isAdded) {
-      // Mark button as added and update label text only.
-      $btn.addClass('tiwsc-added');
-      if ($label.length) {
-        $label.text(ADDED_LABEL);
-      } else {
-        // Legacy fallback when there is no dedicated label span.
-        $btn.text(ADDED_LABEL);
+      // Cache default label text
+      if ($label.length && !$label.data('label-default')) {
+        $label.data('label-default', $.trim($label.text()));
+      } else if (!$label.length && !$btn.data('label-default')) {
+        $btn.data('label-default', $.trim($btn.text()));
       }
-    } else {
-      // Revert button state and restore original label.
-      $btn.removeClass('tiwsc-added');
-      if ($label.length) {
-        $label.text($label.data('label-default') || 'Gratis Kleurstaal');
+
+      if (isAdded) {
+        $btn.addClass('tiwsc-added');
+        if ($label.length) {
+          $label.text(ADDED_LABEL);
+        } else {
+          $btn.text(ADDED_LABEL); // legacy fallback
+        }
+        // Optional icon styling to mirror click-handler visuals
+        $btn.find('svg path:first-child').attr('fill', '#88ae98').attr('stroke', '#88ae98');
       } else {
-        $btn.text($btn.data('label-default') || 'Gratis Kleurstaal');
+        $btn.removeClass('tiwsc-added');
+        if ($label.length) {
+          $label.text($label.data('label-default') || 'Gratis Kleurstaal');
+        } else {
+          $btn.text($btn.data('label-default') || 'Gratis Kleurstaal');
+        }
+        $btn.find('svg path:first-child').attr('fill', 'none').attr('stroke', '#333');
       }
-    }
+    });
+
+    // Optional: keep the individual color tiles in sync for the *current* selection only
+    const key = getAttrKey($form);
+    const $tiles = findPerColorButtons($form);
+    $tiles.each(function () {
+      const $t = $(this);
+      const attrName = $t.data('attribute-name');
+      const attrValue = $t.data('attribute-value');
+      const colorName = $t.data('color-name');
+
+      const tileKey = 'attribute_' + attrName + '=' + attrValue;
+      if (tileKey !== key) return; // only touch the tile that matches the current selection
+
+      if (isAdded) {
+        $t.addClass('tiwsc-added');
+        $t.find('.tiwsc-button-text').text(ADDED_LABEL);
+        $t.find('svg path:first-child').attr('fill', '#88ae98').attr('stroke', '#88ae98');
+      } else {
+        $t.removeClass('tiwsc-added');
+        $t.find('.tiwsc-button-text').text(colorName || ($t.data('label-default') || 'Gratis Kleurstaal'));
+        $t.find('svg path:first-child').attr('fill', 'none').attr('stroke', '#333');
+      }
+    });
   }
 
   function updateForForm($form) {
