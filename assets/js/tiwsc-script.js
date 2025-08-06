@@ -1,3 +1,6 @@
+console.log('!!!!! TIWSC SCRIPT VERSION 2.0 LOADED !!!!!');
+window.TIWSC_VERSION = '2.0';
+
 jQuery(document).ready(function ($) {
   // DEBUG MODE - Remove this block when issue is fixed
   window.TIWSC_DEBUG = true;

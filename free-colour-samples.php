@@ -777,7 +777,7 @@ add_action('wp_enqueue_scripts', function() {
         'tiwsc-script',
         plugins_url('assets/js/tiwsc-script.js', __FILE__),
         ['jquery'],
-        '1.1.1',
+        '2.0.' . time(),  // This will force reload every time during development
         true
     );
     // Get current session samples to initialize JavaScript state
