@@ -1,5 +1,5 @@
-console.log('!!!!! TIWSC SCRIPT VERSION 2.0 LOADED !!!!!');
-window.TIWSC_VERSION = '2.0';
+console.log('!!!!! TIWSC SCRIPT VERSION 3.0 LOADED - FIXED PRODUCT ID TYPE MISMATCH !!!!!');
+window.TIWSC_VERSION = '3.0';
 
 jQuery(document).ready(function ($) {
   // DEBUG MODE - Remove this block when issue is fixed
@@ -38,7 +38,7 @@ jQuery(document).ready(function ($) {
         // Variable product: product_id|attribute|value
         const parts = sampleKey.split('|')
         if (parts.length === 3) {
-          const productId = parts[0]
+          const productId = String(parts[0])  // Ensure it's a string
           const attrName = parts[1]
           const attrValue = parts[2]
           // Convert to the format used in JavaScript
@@ -55,12 +55,13 @@ jQuery(document).ready(function ($) {
   }
 
   function getFormPid ($form) {
-    return (
-      $form.find('input[name="product_id"]').val() ||
+    const pid = $form.find('input[name="product_id"]').val() ||
       $form.find('input[name="add-to-cart"]').val() ||
       $form.data('product_id') ||
-      null
-    )
+      null;
+    
+    // Ensure it's always a string if not null
+    return pid ? String(pid) : null;
   }
 
   // Enhanced function to get the current attribute key
@@ -115,6 +116,16 @@ jQuery(document).ready(function ($) {
     
     const currentKey = getAttrKey($form);
     const set = addedMap.get(pid);
+    
+    // DEBUG: Check all keys in the map
+    tiwscLog('Map keys:', Array.from(addedMap.keys()));
+    tiwscLog('Looking for pid:', pid, 'type:', typeof pid);
+    if (set) {
+      tiwscLog('Set contents:', Array.from(set));
+      tiwscLog('Looking for key:', currentKey);
+      tiwscLog('Has key?:', set.has(currentKey));
+    }
+    
     const isAdded = !!(set && currentKey && set.has(currentKey));
     
     tiwscLog('updateForForm called:', {
@@ -302,7 +313,7 @@ jQuery(document).ready(function ($) {
     e.preventDefault()
     console.log('Sample link clicked')
     var $this = $(this)
-    var productId = $this.data('product-id')
+    var productId = String($this.data('product-id'))
     console.log('Product ID:', productId)
 
     if (typeof tiwsc_ajax === 'undefined') {
@@ -367,7 +378,7 @@ jQuery(document).ready(function ($) {
     e.preventDefault()
     console.log('Variable sample button clicked')
     var $this = $(this)
-    var productId = $this.data('product-id')
+    var productId = String($this.data('product-id'))
     var attributeName = $this.data('attribute-name')
     var attributeValue = $this.data('attribute-value')
     var colorName = $this.data('color-name')
@@ -453,7 +464,7 @@ jQuery(document).ready(function ($) {
     e.preventDefault()
     console.log('[TIWSC] Main variable sample button clicked')
     var $this = $(this)
-    var productId = $this.data('product-id')
+    var productId = String($this.data('product-id'))
     var attributeName = $this.data('attribute-name')
 
     // Find the closest variation form
@@ -580,7 +591,7 @@ jQuery(document).ready(function ($) {
     e.preventDefault()
     console.log('Remove sample clicked')
     var $this = $(this)
-    var productId = $this.data('product-id')
+    var productId = String($this.data('product-id'))
     var sampleKey = $this.data('sample-key')
 
     if (typeof tiwsc_ajax === 'undefined') {
@@ -611,7 +622,7 @@ jQuery(document).ready(function ($) {
 
               // Update all forms with this product
               $(FORM_SELECTOR).each(function () {
-                if (getFormPid($(this)) == productId) {
+                if (getFormPid($(this)) === productId) {
                   updateForForm($(this))
                 }
               })
